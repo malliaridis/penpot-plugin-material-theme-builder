@@ -1,6 +1,6 @@
 {
-  "name": "Penpot starter plugin",
+  "name": "Penpot Material3 Theme Builder",
   "code": "plugin.js",
-  "description": "This is a starter plugin for Penpot",
+  "description": "This is a Penpot plugin for generating Material 3 Theme assets",
   "permissions": ["content:read", "content:write"]
 }
