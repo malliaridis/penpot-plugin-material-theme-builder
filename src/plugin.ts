@@ -1,4 +1,4 @@
-import {createThemeColors} from "./material3-theme-builder.ts";
+import { createThemeColors } from "./material3-theme-builder.ts";
 
 penpot.ui.open("Material 3 Theme Builder", `?theme=${penpot.theme}`);
 

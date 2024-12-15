@@ -2,5 +2,10 @@
   "name": "Penpot Material3 Theme Builder",
   "code": "plugin.js",
   "description": "This is a Penpot plugin for generating Material 3 Theme assets",
-  "permissions": ["content:read", "content:write", "library:read", "library:write"]
+  "permissions": [
+    "content:read",
+    "content:write",
+    "library:read",
+    "library:write"
+  ]
 }
