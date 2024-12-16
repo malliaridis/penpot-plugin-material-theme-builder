@@ -1,23 +1,12 @@
-penpot.ui.open("Penpot plugin starter template", `?theme=${penpot.theme}`);
+import { createThemeColors } from "./material3-theme-builder.ts";
+
+penpot.ui.open("Material 3 Theme Builder", `?theme=${penpot.theme}`);
 
 penpot.ui.onMessage<string>((message) => {
-  if (message === "create-text") {
-    const text = penpot.createText("Hello world!");
-
-    if (text) {
-      text.x = penpot.viewport.center.x;
-      text.y = penpot.viewport.center.y;
-
-      penpot.selection = [text];
-    }
+  switch (message) {
+    case "generate-theme":
+      // TODO Allow user to provide theme name and color through message data
+      createThemeColors("iron-theme", "#F0F020");
+      break;
   }
-});
-
-// Update the theme in the iframe
-penpot.on("themechange", (theme) => {
-  penpot.ui.sendMessage({
-    source: "penpot",
-    type: "themechange",
-    theme,
-  });
 });
