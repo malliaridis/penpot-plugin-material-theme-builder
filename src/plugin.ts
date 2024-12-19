@@ -1,6 +1,6 @@
-import { createThemeColors } from "./material3-theme-builder.ts";
+import { createThemeColors } from "./material-theme-builder.ts";
 
-penpot.ui.open("Material 3 Theme Builder", `?theme=${penpot.theme}`);
+penpot.ui.open("Material Theme Builder", `?theme=${penpot.theme}`);
 
 penpot.ui.onMessage<string>((message) => {
   switch (message) {
