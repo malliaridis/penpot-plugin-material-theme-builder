@@ -11,7 +11,7 @@ import {
   Schemes,
   stateOpacities,
   toneValues,
-} from "./model.ts";
+} from "./model/material.ts";
 
 export function createThemeColors(
   themeName: string,

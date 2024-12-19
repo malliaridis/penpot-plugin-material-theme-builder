@@ -1,12 +1,14 @@
 import { createThemeColors } from "./material-theme-builder.ts";
+import { GenerateThemeData, Message } from "./model/message.ts";
 
 penpot.ui.open("Material Theme Builder", `?theme=${penpot.theme}`);
 
-penpot.ui.onMessage<string>((message) => {
-  switch (message) {
-    case "generate-theme":
-      // TODO Allow user to provide theme name and color through message data
-      createThemeColors("iron-theme", "#F0F020");
+penpot.ui.onMessage<Message>((message) => {
+  switch (message.type) {
+    case "generate-theme": {
+      const { themeName, sourceColorHex } = message.data as GenerateThemeData;
+      createThemeColors(themeName, sourceColorHex);
       break;
+    }
   }
 });
