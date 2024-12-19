@@ -26,3 +26,10 @@ export interface PenpotData extends MessageData {
   source: "penpot";
   theme: "string";
 }
+
+/**
+ * State layer opacities according to "State layer tokens & values" from Material 3.
+ *
+ * @see https://m3.material.io/foundations/interaction/states/state-layers
+ */
+export const stateOpacities = [0.08, 0.10, 0.16];
