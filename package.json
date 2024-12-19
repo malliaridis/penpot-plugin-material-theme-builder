@@ -7,7 +7,7 @@
     "dev": "vite-live-preview",
     "build": "tsc && vite build",
     "test": "echo TODO No tests present",
-    "lint": "eslint . && prettier .",
+    "lint": "eslint . && prettier . --check",
     "lint:fix": "eslint . --fix && prettier . --write"
   },
   "dependencies": {
