@@ -3,18 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Penpot plugin example</title>
+    <link rel="stylesheet" href="styles.css" />
+    <title>Material Theme Builder</title>
   </head>
   <body>
-    <p>Penpot plugin starter template</p>
-
     <p>
-      Checkout the
-      <a target="_blank" href="https://help.penpot.app/plugins/"
-        >documentation</a
-      >
-      to get started.
+      Material theme builder that allows you to generate assets based on
+      Material 3.
     </p>
+    <div class="form-group">
+      <label class="input-label" for="input-theme-name">Theme Name</label>
+      <input
+        class="input"
+        type="text"
+        placeholder="material-theme"
+        id="input-theme-name"
+      />
+      <div style="height: var(--spacing-16)"></div>
+      <label for="input-source-color">Source Color</label>
+      <input
+        class="input"
+        type="color"
+        id="input-source-color"
+        value="#673AB7"
+      />
+    </div>
+
+    <div style="height: var(--spacing-24)"></div>
 
     <button
       type="button"
