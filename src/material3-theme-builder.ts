@@ -5,13 +5,19 @@ import {
   themeFromSourceColor,
   TonalPalette,
 } from "@material/material-color-utilities";
-import {JsonScheme, Palettes, Schemes, stateOpacities, toneValues} from "./model.ts";
+import {
+  JsonScheme,
+  Palettes,
+  Schemes,
+  stateOpacities,
+  toneValues,
+} from "./model.ts";
 
 export function createThemeColors(
-    themeName: string,
-    sourceColor: string,
-    withTonalPalettes: Boolean = false,
-    withStateLayers: Boolean = true,
+  themeName: string,
+  sourceColor: string,
+  withTonalPalettes = false,
+  withStateLayers = true,
 ) {
   const theme: Theme = themeFromSourceColor(argbFromHex(sourceColor));
 
@@ -39,7 +45,7 @@ function createColorScheme(
   themeName: string,
   name: string,
   jsonScheme: JsonScheme,
-  withStateLayers: Boolean = true,
+  withStateLayers = true,
 ) {
   for (const colorName in jsonScheme) {
     const argbColor = jsonScheme[colorName];
@@ -48,7 +54,8 @@ function createColorScheme(
     color.path = `${themeName}/scheme/${name}`;
     color.name = colorName;
 
-    if (withStateLayers) createStateLayerColors(themeName, name, colorName, color.color);
+    if (withStateLayers)
+      createStateLayerColors(themeName, name, colorName, color.color);
   }
 }
 
@@ -63,7 +70,7 @@ function createStateLayerColors(
     stateColor.color = color;
     stateColor.opacity = opacity;
     stateColor.path = `${themeName}/state-layers/${name}/${colorName}`;
-    stateColor.name = `opacity-${opacity.toFixed(2).toString()}`
+    stateColor.name = `opacity-${opacity.toFixed(2).toString()}`;
   });
 }
 
@@ -75,9 +82,9 @@ function createTonalPalettes(themeName: string, palettes: Palettes) {
 }
 
 function createColorPalette(
-    themeName: string,
-    name: string,
-    palette: TonalPalette,
+  themeName: string,
+  name: string,
+  palette: TonalPalette,
 ) {
   toneValues.forEach((tone) => {
     const argbColor = palette.tone(tone);

@@ -32,4 +32,4 @@ export interface PenpotData extends MessageData {
  *
  * @see https://m3.material.io/foundations/interaction/states/state-layers
  */
-export const stateOpacities = [0.08, 0.10, 0.16];
+export const stateOpacities = [0.08, 0.1, 0.16];
