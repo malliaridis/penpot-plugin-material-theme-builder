@@ -1,5 +1,5 @@
 {
-  "name": "Penpot Plugin - Material Theme Builder",
+  "name": "Material Theme Builder",
   "code": "plugin.js",
   "description": "This is a Penpot plugin for generating Material assets",
   "permissions": [
