@@ -14,3 +14,15 @@ updates:
       interval: "daily"
     labels:
       - "dependencies"
+    groups:
+      eslint-prettier:
+        patterns:
+          - "eslint*"
+          - "@eslint/js"
+          - "typescript-eslint"
+          - "@typescript-eslint/*"
+          - "prettier*"
+          - "globals"
+      vite:
+        patterns:
+          - "vite*"
