@@ -28,5 +28,6 @@
     "typescript-eslint": "^8.18.0",
     "vite": "^6.0.3",
     "vite-live-preview": "^0.3.2"
-  }
+  },
+  "license": "MIT"
 }
