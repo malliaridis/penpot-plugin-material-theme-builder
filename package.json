@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite-live-preview",
     "build": "tsc && vite build",
+    "preview": "vite preview",
     "test": "echo TODO No tests present",
     "lint": "eslint . && prettier . --check",
     "lint:fix": "eslint . --fix && prettier . --write"
