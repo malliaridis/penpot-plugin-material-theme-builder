@@ -42,4 +42,3 @@ components.
 
 The plugin provides helper features that makes it easy to swap theme values and
 toggle between light and dark theme variants.
-
