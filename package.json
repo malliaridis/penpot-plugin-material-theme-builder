@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite-live-preview",
     "build": "tsc && vite build",
+    "preview": "vite preview",
     "test": "echo TODO No tests present",
     "lint": "eslint . && prettier . --check",
     "lint:fix": "eslint . --fix && prettier . --write"
@@ -28,5 +29,6 @@
     "typescript-eslint": "^8.18.1",
     "vite": "^6.0.4",
     "vite-live-preview": "^0.3.2"
-  }
+  },
+  "license": "MIT"
 }
