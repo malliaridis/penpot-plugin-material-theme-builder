@@ -19,13 +19,28 @@
         id="input-theme-name"
       />
       <div style="height: var(--spacing-16)"></div>
-      <label for="input-source-color">Source Color</label>
-      <input
-        class="input"
-        type="color"
-        id="input-source-color"
-        value="#673AB7"
-      />
+      <label class="input-label" for="input-source-color-value"
+        >Source Color</label
+      >
+      <label class="input-label-hidden" for="input-source-color-block"
+        >Source Color</label
+      >
+      <div id="source-color-input" class="input color-input" tabindex="3">
+        <input
+          type="color"
+          class="color-picker"
+          id="input-source-color-block"
+          value="#673AB7"
+          tabindex="4"
+        />
+        <input
+          type="text"
+          class="input color-input-text"
+          id="input-source-color-value"
+          value="#673AB7"
+          tabindex="5"
+        />
+      </div>
     </div>
 
     <div style="height: var(--spacing-24)"></div>
@@ -33,6 +48,7 @@
     <button
       type="button"
       data-appearance="primary"
+      class="full-width-button"
       data-handler="generate-theme"
     >
       Generate Theme

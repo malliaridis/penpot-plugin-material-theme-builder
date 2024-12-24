@@ -1,5 +1,9 @@
 import "./style.css";
-import { Message, PenpotMessage } from "./model/message.ts";
+import {
+  ColorValueChangedMessage,
+  Message,
+  PenpotMessage,
+} from "./model/message.ts";
 
 // get the current theme from the URL
 const searchParams = new URLSearchParams(window.location.search);
@@ -13,9 +17,11 @@ document
     ) as HTMLInputElement;
 
     const sourceColorInputField = document.getElementById(
-      "input-source-color",
+      "input-source-color-value",
     ) as HTMLInputElement;
+
     const themeNameValue = themeNameInputField.value;
+
     sendMessage({
       type: "generate-theme",
       data: {
@@ -25,11 +31,92 @@ document
     });
   });
 
+document
+  .getElementById("input-source-color-value")
+  ?.addEventListener("blur", () => {
+    const themeNameInputField = document.getElementById(
+      "input-theme-name",
+    ) as HTMLInputElement;
+
+    const sourceColorInputField = document.getElementById(
+      "input-source-color-value",
+    ) as HTMLInputElement;
+
+    const sourceColorBlockInputBlock = document.getElementById(
+      "input-source-color-block",
+    ) as HTMLInputElement;
+
+    const themeNameValue = themeNameInputField.value;
+    const inputValue = sourceColorInputField.value;
+
+    if (inputValue) {
+      sendMessage({
+        type: "validate-and-set-color",
+        data: {
+          themeName: themeNameValue != "" ? themeNameValue : "material-theme",
+          sourceColorRaw: sourceColorInputField.value,
+        },
+      });
+    } else {
+      // Set color from block if field is left empty.
+      sourceColorInputField.value = sourceColorBlockInputBlock.value;
+    }
+  });
+
+document
+  .getElementById("input-source-color-block")
+  ?.addEventListener("blur", () => {
+    const themeNameInputField = document.getElementById(
+      "input-theme-name",
+    ) as HTMLInputElement;
+
+    const sourceColorInputField = document.getElementById(
+      "input-source-color-value",
+    ) as HTMLInputElement;
+
+    const sourceColorBlockInputBlock = document.getElementById(
+      "input-source-color-block",
+    ) as HTMLInputElement;
+
+    const themeNameValue = themeNameInputField.value;
+    const inputValue = sourceColorBlockInputBlock.value;
+
+    if (inputValue) {
+      sendMessage({
+        type: "validate-and-set-color",
+        data: {
+          themeName: themeNameValue != "" ? themeNameValue : "material-theme",
+          sourceColorRaw: sourceColorBlockInputBlock.value,
+        },
+      });
+    } else {
+      // Set color from block if field is left empty.
+      sourceColorBlockInputBlock.value = sourceColorInputField.value;
+    }
+  });
+
 // Listen plugin.ts messages
 window.addEventListener("message", (event: MessageEvent<Message>) => {
-  if (event.data.type === "penpot") {
-    const message = event.data as PenpotMessage;
-    document.body.dataset.theme = message.data.theme;
+  const sourceColorInputField = document.getElementById(
+    "input-source-color-value",
+  ) as HTMLInputElement;
+
+  const sourceColorBlockInputBlock = document.getElementById(
+    "input-source-color-block",
+  ) as HTMLInputElement;
+
+  switch (event.data.type) {
+    case "penpot": {
+      const message = event.data as PenpotMessage;
+      document.body.dataset.theme = message.data.theme;
+      break;
+    }
+    case "color-value-changed": {
+      const message = event.data as ColorValueChangedMessage;
+      sourceColorInputField.value = message.data.color;
+      sourceColorBlockInputBlock.value = message.data.color;
+      break;
+    }
   }
 });
 
