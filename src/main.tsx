@@ -1,4 +1,7 @@
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import "./style.css";
+import App from "./App.tsx";
 import {
   ColorValueChangedMessage,
   Message,
@@ -127,4 +130,16 @@ window.addEventListener("message", (event: MessageEvent<Message>) => {
  */
 function sendMessage(message: Message) {
   parent.postMessage(message, "*");
+}
+
+const rootElement = document.getElementById("root");
+
+if (rootElement) {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+} else {
+  console.error("Root element not found");
 }

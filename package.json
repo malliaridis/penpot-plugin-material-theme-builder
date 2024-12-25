@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite-live-preview",
-    "build": "tsc && vite build",
+    "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "echo TODO No tests present",
     "lint": "eslint . && prettier . --check",
