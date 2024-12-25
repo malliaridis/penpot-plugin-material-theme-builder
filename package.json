@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite-live-preview",
-    "build": "tsc && vite build",
+    "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "echo TODO No tests present",
     "lint": "eslint . && prettier . --check",
@@ -14,15 +14,22 @@
   "dependencies": {
     "@material/material-color-utilities": "^0.3.0",
     "@penpot/plugin-styles": "1.1.0",
-    "@penpot/plugin-types": "1.1.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@penpot/plugin-types": "1.1.0",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
     "@typescript-eslint/eslint-plugin": "^8.18.2",
     "@typescript-eslint/parser": "^8.18.2",
+    "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
     "prettier": "3.4.2",
     "typescript": "^5.7.2",

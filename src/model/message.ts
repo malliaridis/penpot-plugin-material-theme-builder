@@ -5,52 +5,74 @@ type MessageType =
   | "generate-theme"
   | "validate-and-set-color"
   | "color-value-changed"
+  | "create-local-library-color"
   | "penpot";
 
 type MessageData =
   | GenerateThemeData
   | ValidateAndSetColor
   | PenpotData
+  | CreateLocalLibraryColorData
   | ColorValueChanged;
 
 /**
  * Message with predefined types.
  */
-export interface Message {
+interface Message {
   type: MessageType;
   data: MessageData;
 }
 
-export interface GenerateThemeMessage extends Message {
+interface CreateLocalLibraryColorData {
+  color: string;
+  group: string;
+  name: string;
+}
+
+interface GenerateThemeMessage extends Message {
   type: "generate-theme";
   data: GenerateThemeData;
 }
 
-export interface GenerateThemeData {
+interface GenerateThemeData {
   themeName: string;
   sourceColorHex: string;
 }
 
-export interface ValidateAndSetColor {
+interface ValidateAndSetColor {
   themeName: string;
   sourceColorRaw: string;
 }
 
-export interface PenpotMessage {
+interface PenpotMessage {
   type: "penpot";
   data: PenpotData;
 }
 
-export interface ColorValueChangedMessage {
+interface ColorValueChangedMessage {
   type: "color-value-changed";
   data: ColorValueChanged;
 }
 
-export interface PenpotData {
+interface PenpotData {
   source: string;
   theme: "string";
 }
 
-export interface ColorValueChanged {
+interface ColorValueChanged {
   color: string;
 }
+
+export type {
+  MessageType,
+  MessageData,
+  Message,
+  GenerateThemeMessage,
+  GenerateThemeData,
+  ValidateAndSetColor,
+  PenpotMessage,
+  ColorValueChangedMessage,
+  PenpotData,
+  ColorValueChanged,
+  CreateLocalLibraryColorData,
+};

@@ -1,11 +1,13 @@
 import { defineConfig } from "vite";
 import livePreview from "vite-live-preview";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [
     livePreview({
       reload: true,
     }),
+    react(),
   ],
   build: {
     rollupOptions: {
