@@ -1,0 +1,27 @@
+.footer {
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-16);
+  flex-wrap: nowrap;
+}
+
+.footer-element {
+  padding: var(--spacing-4);
+  text-decoration: none;
+  color: var(--foreground-secondary);
+
+  &:visited {
+    color: inherit;
+    text-decoration: inherit;
+  }
+}
+
+.footer-divider {
+  display: inline-block;
+  width: 1px;
+  height: var(--spacing-12);
+  background-color: var(--background-quaternary);
+  vertical-align: middle;
+}

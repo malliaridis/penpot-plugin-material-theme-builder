@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
+import "./ColorPicker.css";
 import { getValidSourceColor } from "../../utils/color-utils.ts";
 
 /**
