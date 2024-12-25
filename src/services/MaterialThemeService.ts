@@ -24,7 +24,6 @@ interface MaterialThemeService {
   ): Promise<void>;
 }
 
-// TODO Consider using a PenpotMaterialThemeService implementation instead
 class MessageMaterialThemeService implements MaterialThemeService {
   async generateTheme(
     themeName: string,
