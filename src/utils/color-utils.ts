@@ -1,3 +1,12 @@
+import { LibraryColor } from "@penpot/plugin-types";
+import {
+  JsonScheme,
+  Palettes,
+  PluginTheme,
+  Schemes,
+} from "../model/material.ts";
+import { Theme } from "@material/material-color-utilities";
+
 const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
 
 function getValidSourceColor(
@@ -39,4 +48,169 @@ function argbWithOpacity(argb: number, opacity: number): number {
   return (newAlpha << 24) | (argb & 0x00ffffff);
 }
 
-export { getValidSourceColor, argbWithOpacity };
+function mapColorsToThemes(colors: LibraryColor[]): PluginTheme[] {
+  const themes: PluginTheme[] = colors
+    .filter((color) => {
+      // This is the simplest form of identifying plugin-generated themes.
+      // Look for library colors that are in the format of "[theme-name] / source"
+      return (
+        color.path.length > 0 &&
+        !color.path.includes("/") &&
+        color.name == "source"
+      );
+    })
+    .map((color) => {
+      return {
+        name: color.path,
+        source: color,
+        scheme: {},
+        stateLayers: {},
+        palettes: [],
+      };
+    });
+
+  themes.forEach((theme) => {
+    const themePrefix = theme.name + " / ";
+
+    colors
+      .filter((color) => {
+        return color.path.startsWith(themePrefix);
+      })
+      .forEach((themeColor) => {
+        const subPath = themeColor.path.substring(themePrefix.length);
+        addIfSchemeColor(theme, subPath, themeColor);
+        addIfStateLayerColor(theme, subPath, themeColor);
+        addIfPaletteColor(theme, subPath, themeColor);
+      });
+  });
+
+  return themes;
+}
+
+function addIfSchemeColor(
+  theme: PluginTheme,
+  subPath: string,
+  color: LibraryColor,
+) {
+  if (subPath.startsWith("scheme / ")) {
+    const variant = subPath.split(" / ")[1];
+    if (theme.scheme[variant]) {
+      theme.scheme[variant].push(color);
+    } else {
+      theme.scheme[variant] = [color];
+    }
+  }
+}
+
+function addIfStateLayerColor(
+  theme: PluginTheme,
+  subPath: string,
+  color: LibraryColor,
+) {
+  if (subPath.startsWith("state-layers / ")) {
+    const variant = subPath.split(" / ")[1];
+    if (theme.stateLayers[variant]) {
+      theme.stateLayers[variant].push(color);
+    } else {
+      theme.stateLayers[variant] = [color];
+    }
+  }
+}
+
+function addIfPaletteColor(
+  theme: PluginTheme,
+  subPath: string,
+  color: LibraryColor,
+) {
+  if (subPath.startsWith("palettes")) {
+    theme.palettes.push(color);
+  }
+}
+
+function flattenColors(
+  pluginTheme: PluginTheme,
+  excludeRootLevelColors: boolean,
+): LibraryColor[] {
+  const colors: LibraryColor[] = [];
+
+  if (!excludeRootLevelColors) colors.push(pluginTheme.source);
+
+  // Add scheme colors
+  for (const scheme in pluginTheme.scheme) {
+    const schemeColors = pluginTheme.scheme[scheme] ?? [];
+    colors.push(...schemeColors);
+  }
+
+  // Add state-layer colors
+  for (const scheme in pluginTheme.stateLayers) {
+    const schemeColors = pluginTheme.stateLayers[scheme] ?? [];
+    colors.push(...schemeColors);
+  }
+
+  // Add palettes
+  colors.push(...pluginTheme.palettes);
+
+  return colors;
+}
+
+function getColorForPathSegments(
+  theme: Theme,
+  segments: string[],
+  name: string,
+): number | undefined {
+  if (segments.length == 1) {
+    if (name == "source") return theme.source;
+  }
+
+  switch (segments[1]) {
+    case "scheme": {
+      const scheme: JsonScheme =
+        theme.schemes[segments[2] as keyof Schemes].toJSON();
+      return scheme[name];
+    }
+    case "state-layers": {
+      const scheme: JsonScheme =
+        theme.schemes[segments[2] as keyof Schemes].toJSON();
+      const color = scheme[segments[3]];
+      const opacity = Number(name.split("-"));
+      return argbWithOpacity(color, opacity);
+    }
+    case "palettes": {
+      const elements = name.split("-");
+      const color = elements[0];
+      const tone = elements[1];
+
+      return theme.palettes[color as keyof Palettes].tone(Number(tone));
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Returns the total colors of a plugin theme.
+ *
+ * @param withStateLayers Whether the theme should include state layers
+ * @param withTonalPalettes Whether the theme should include tonal palettes.
+ */
+function getExpectedColorsCount(
+  withStateLayers: boolean,
+  withTonalPalettes: boolean,
+) {
+  let expectedColorCount = 59;
+  if (withStateLayers) {
+    expectedColorCount += 174;
+  }
+  if (withTonalPalettes) {
+    expectedColorCount += 72;
+  }
+  return expectedColorCount;
+}
+
+export {
+  getValidSourceColor,
+  argbWithOpacity,
+  mapColorsToThemes,
+  flattenColors,
+  getColorForPathSegments,
+  getExpectedColorsCount,
+};

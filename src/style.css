@@ -20,11 +20,12 @@ p {
   width: 100%;
 }
 
-.full-width-button {
-  width: 100%;
-}
-
 .checkbox-container {
   align-items: center;
   height: var(--spacing-32);
+}
+
+.checkbox-input[type="checkbox"]:checked:disabled {
+  background-color: var(--foreground-secondary);
+  border: 1px solid var(--foreground-secondary);
 }

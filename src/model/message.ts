@@ -1,78 +1,88 @@
-/**
- * Well-known message types.
- */
-type MessageType =
-  | "generate-theme"
-  | "validate-and-set-color"
-  | "color-value-changed"
-  | "create-local-library-color"
-  | "penpot";
+import { LibraryColor } from "@penpot/plugin-types";
 
-type MessageData =
-  | GenerateThemeData
-  | ValidateAndSetColor
-  | PenpotData
-  | CreateLocalLibraryColorData
-  | ColorValueChanged;
+/**
+ * The source of the messages.
+ *
+ * A message is either coming from penpot or from the plugin.
+ */
+type MessageSource = "penpot" | "plugin";
+
+/**
+ * The message data that can be either a penpot message or a plugin message,
+ * depending on the source.
+ */
+type MessageData = PenpotData | PluginData;
 
 /**
  * Message with predefined types.
  */
-interface Message {
-  type: MessageType;
-  data: MessageData;
+interface Message<T> {
+  source: MessageSource;
+  type: string;
+  data: T;
 }
+
+type PenpotData = PenpotThemeData | PenpotColorsData | PenpotColorData;
+
+type PluginData =
+  | CreateLocalLibraryColorData
+  | UpdateLibraryColorData
+  | DeleteLocalLibraryThemeData;
 
 interface CreateLocalLibraryColorData {
   color: string;
   group: string;
   name: string;
+  ref: number;
 }
 
-interface GenerateThemeMessage extends Message {
-  type: "generate-theme";
-  data: GenerateThemeData;
+interface UpdateLibraryColorData {
+  /**
+   * Library color to update
+   */
+  color: LibraryColor;
+  /**
+   * New path of the color to set
+   */
+  path: string;
+  /**
+   * New color value to use
+   */
+  value: string;
+  /**
+   * Reference number for traceability.
+   */
+  ref: number;
 }
 
-interface GenerateThemeData {
+interface DeleteLocalLibraryThemeData {
   themeName: string;
-  sourceColorHex: string;
+  ref: number;
 }
 
-interface ValidateAndSetColor {
-  themeName: string;
-  sourceColorRaw: string;
+interface PenpotThemeData {
+  theme: string;
 }
 
-interface PenpotMessage {
-  type: "penpot";
-  data: PenpotData;
+interface PenpotColorsData {
+  colors: LibraryColor[];
 }
 
-interface ColorValueChangedMessage {
-  type: "color-value-changed";
-  data: ColorValueChanged;
-}
-
-interface PenpotData {
-  source: string;
-  theme: "string";
-}
-
-interface ColorValueChanged {
-  color: string;
+interface PenpotColorData {
+  color: LibraryColor;
+  ref: number;
 }
 
 export type {
-  MessageType,
+  MessageSource,
   MessageData,
   Message,
-  GenerateThemeMessage,
-  GenerateThemeData,
-  ValidateAndSetColor,
-  PenpotMessage,
-  ColorValueChangedMessage,
   PenpotData,
-  ColorValueChanged,
+  PluginData,
+  PenpotThemeData,
+  PenpotColorsData,
+  PenpotColorData,
   CreateLocalLibraryColorData,
+  UpdateLibraryColorData,
+  DeleteLocalLibraryThemeData,
 };
