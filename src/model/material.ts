@@ -1,4 +1,14 @@
 import { Scheme, TonalPalette } from "@material/material-color-utilities";
+import { LibraryColor } from "@penpot/plugin-types";
+
+interface PluginTheme {
+  name: string;
+  source: LibraryColor;
+  scheme: Record<string, LibraryColor[] | undefined>;
+  stateLayers: Record<string, LibraryColor[] | undefined>;
+  palettes: LibraryColor[];
+  // TODO Add unsupported colors that use the theme as prefix
+}
 
 interface Schemes {
   light: Scheme;
@@ -26,4 +36,4 @@ const toneValues = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100];
 const stateOpacities = [0.08, 0.1, 0.16];
 
 export { toneValues, stateOpacities };
-export type { Schemes, Palettes, JsonScheme };
+export type { Schemes, Palettes, JsonScheme, PluginTheme };

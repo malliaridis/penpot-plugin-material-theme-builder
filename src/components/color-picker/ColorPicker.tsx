@@ -23,6 +23,7 @@ interface ColorPickerProps {
  */
 interface ColorPickerRef {
   getColor: () => string;
+  setColor: (color: string) => void;
 }
 
 const ColorPicker = forwardRef<ColorPickerRef, ColorPickerProps>(
@@ -36,6 +37,10 @@ const ColorPicker = forwardRef<ColorPickerRef, ColorPickerProps>(
 
     useImperativeHandle(ref, () => ({
       getColor: () => color,
+      setColor: (color: string) => {
+        setInputColor(color);
+        setColor(color);
+      },
     }));
 
     const updateColor = (color: string) => {
@@ -64,7 +69,7 @@ const ColorPicker = forwardRef<ColorPickerRef, ColorPickerProps>(
     }, [color, inputColor]);
 
     return (
-      <>
+      <div className="form-group">
         <label
           className="input-label body-m"
           htmlFor="input-source-color-value"
@@ -93,7 +98,7 @@ const ColorPicker = forwardRef<ColorPickerRef, ColorPickerProps>(
             }}
           />
         </div>
-      </>
+      </div>
     );
   },
 );
