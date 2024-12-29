@@ -18,6 +18,12 @@ const PenpotContextProvider: React.FC<PenpotContextProviderProps> = ({
 }) => {
   const [themes, setThemes] = useState<PluginTheme[]>([]);
 
+  const sortBeforeSetThemes = (themes: PluginTheme[]) => {
+    setThemes(
+      themes.sort((theme1, theme2) => theme1.name.localeCompare(theme2.name)),
+    );
+  };
+
   // Listen plugin.ts messages
   window.addEventListener(
     "message",
@@ -31,7 +37,7 @@ const PenpotContextProvider: React.FC<PenpotContextProviderProps> = ({
         case "library-colors-fetched": {
           const data = event.data.data as PenpotColorsData;
           const themes = mapColorsToThemes(data.colors);
-          setThemes(themes);
+          sortBeforeSetThemes(themes);
           break;
         }
       }
@@ -50,7 +56,7 @@ const PenpotContextProvider: React.FC<PenpotContextProviderProps> = ({
   }, []);
 
   return (
-    <PenpotContext.Provider value={{ themes, setThemes }}>
+    <PenpotContext.Provider value={{ themes, setThemes: sortBeforeSetThemes }}>
       {children}
     </PenpotContext.Provider>
   );
