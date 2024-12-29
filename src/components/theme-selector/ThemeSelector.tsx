@@ -27,6 +27,11 @@ interface ThemeSelectorProps {
    * a new theme, for example.
    */
   onThemeChanged: (themeName: string | undefined) => void;
+
+  /**
+   * Whether the theme selector should be disabled.
+   */
+  disabled: boolean;
 }
 
 const ThemeSelector: React.FC<ThemeSelectorProps> = ({
@@ -34,6 +39,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
   allowNewTheme,
   currentTheme,
   onThemeChanged,
+  disabled,
 }: ThemeSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -53,10 +59,12 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
     <div className="form-group">
       <span className="input-label body-m">Theme</span>
       <div
+        tabIndex={0}
         className={isOpen ? "select select-active" : "select"}
         onClick={() => {
-          setIsOpen(!isOpen);
+          setIsOpen(!disabled && !isOpen);
         }}
+        aria-disabled={disabled}
       >
         <div className="selected-option">
           {currentTheme ? (

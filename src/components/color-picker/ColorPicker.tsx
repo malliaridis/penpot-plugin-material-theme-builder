@@ -16,6 +16,11 @@ interface ColorPickerProps {
    *  The initial color to use.
    */
   color?: string;
+
+  /**
+   * Whether the input field is disabled.
+   */
+  disabled: boolean;
 }
 
 /**
@@ -76,7 +81,11 @@ const ColorPicker = forwardRef<ColorPickerRef, ColorPickerProps>(
         >
           Source Color
         </label>
-        <div id="source-color-input" className="input color-input" tabIndex={3}>
+        <div
+          id="source-color-input"
+          className="input color-input"
+          aria-disabled={props.disabled}
+        >
           <input
             type="color"
             ref={inputRef}
@@ -86,6 +95,7 @@ const ColorPicker = forwardRef<ColorPickerRef, ColorPickerProps>(
             onChange={(e) => {
               updateColor(e.target.value);
             }}
+            disabled={props.disabled}
           />
           <input
             type="text"
@@ -96,6 +106,7 @@ const ColorPicker = forwardRef<ColorPickerRef, ColorPickerProps>(
             onChange={(e) => {
               setInputColor(e.target.value);
             }}
+            disabled={props.disabled}
           />
         </div>
       </div>

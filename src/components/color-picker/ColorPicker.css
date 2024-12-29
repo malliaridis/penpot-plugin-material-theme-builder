@@ -16,6 +16,17 @@
     background: var(--background-primary);
     border: 1px var(--accent-primary) solid;
   }
+
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+    background-color: var(--background-primary);
+    border-color: var(--background-quaternary);
+
+    &:hover {
+      background-color: var(--background-primary);
+      border-color: var(--background-quaternary);
+    }
+  }
 }
 
 .color-input-color {
@@ -40,9 +51,13 @@
   line-height: var(--font-line-height-l);
   padding-block: var(--spacing-4);
 
-  :focus {
+  &:focus {
     border: 0 transparent solid;
     outline: 0 transparent solid;
+  }
+
+  &:disabled {
+    color: var(--foreground-secondary);
   }
 }
 
@@ -74,4 +89,10 @@
 
 .color-picker:hover {
   outline: 2px var(--accent-primary) solid;
+}
+
+.color-picker:disabled {
+  outline: 2px transparent solid;
+  cursor: not-allowed;
+  opacity: 0.5;
 }

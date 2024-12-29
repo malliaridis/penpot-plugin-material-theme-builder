@@ -63,3 +63,11 @@
     color: var(--background-quaternary);
   }
 }
+
+.primary {
+  color: var(--foreground-primary);
+}
+
+.secondary {
+  color: var(--foreground-secondary);
+}

@@ -1,0 +1,27 @@
+.toast-loader {
+  position: absolute;
+  bottom: 0;
+  background-color: var(--background-primary);
+  width: 100%;
+  border: 1px var(--background-quaternary) solid;
+  border-radius: var(--spacing-8);
+}
+
+.toast-loader-content {
+  padding: var(--spacing-8);
+  width: 100%;
+  display: flex;
+  gap: var(--spacing-8);
+}
+
+.toast-progress-bar {
+  bottom: 0;
+  width: 100%;
+  height: var(--spacing-4);
+  background-color: var(--background-quaternary);
+}
+
+.toast-progress-bar-indicator {
+  height: var(--spacing-4);
+  background-color: var(--accent-primary);
+}

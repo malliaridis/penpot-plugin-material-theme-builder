@@ -18,14 +18,27 @@ p {
 
 .input {
   width: 100%;
+
+  &:disabled {
+    color: var(--foreground-secondary);
+  }
 }
 
 .checkbox-container {
   align-items: center;
   height: var(--spacing-32);
+
+  &[aria-disabled="true"] {
+    cursor: progress;
+
+    label {
+      cursor: progress;
+    }
+  }
 }
 
 .checkbox-input[type="checkbox"]:checked:disabled {
   background-color: var(--foreground-secondary);
   border: 1px solid var(--foreground-secondary);
+  cursor: not-allowed;
 }

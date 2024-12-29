@@ -9,6 +9,7 @@ import { ThemeSelector } from "./components/theme-selector/ThemeSelector.tsx";
 import { PenpotContext } from "./components/penpot/PenpotContext.ts";
 import { PluginTheme } from "./model/material.ts";
 import { Trash } from "react-feather";
+import { ToastLoader } from "./components/toast-loader/ToastLoader.tsx";
 
 function App() {
   const penpotContext = useContext(PenpotContext);
@@ -23,11 +24,14 @@ function App() {
   const [generateStateLayers, setGenerateStateLayers] =
     useState<boolean>(false);
 
+  const [progress, setProgress] = useState<number[] | undefined>(undefined);
+  const isLoading = progress != undefined;
+
   const materialService = new MessageMaterialThemeService();
 
-  const onProgress = (progress: number, total: number) => {
-    // TODO Implement notification with progress bar
-    console.log(`${progress.toString()}/${total.toString()}`);
+  const onProgress = (currentProgress: number, total: number) => {
+    if (currentProgress != total) setProgress([currentProgress, total]);
+    else setProgress(undefined);
   };
 
   const onGenerateClicked = () => {
@@ -135,6 +139,7 @@ function App() {
         <div className="column-16">
           <ThemeSelector
             themes={penpotContext.themes}
+            disabled={isLoading}
             currentTheme={currentTheme?.name}
             allowNewTheme={true}
             onThemeChanged={onThemeChanged}
@@ -149,6 +154,7 @@ function App() {
               placeholder={currentTheme ? currentTheme.name : "material-theme"}
               id="input-theme-name"
               value={themeName}
+              disabled={isLoading}
               onChange={(e) => {
                 setThemeName(e.target.value);
               }}
@@ -156,12 +162,13 @@ function App() {
           </div>
           <ColorPicker
             ref={colorPickerRef}
+            disabled={isLoading}
             color={currentTheme?.source.color}
           />
 
           <div>
             <span className="body-m">Additional Options</span>
-            <div className="checkbox-container">
+            <div className="checkbox-container" aria-disabled={isLoading}>
               <input
                 className="checkbox-input"
                 type="checkbox"
@@ -170,7 +177,10 @@ function App() {
                 onChange={(e) => {
                   setGenerateTonalPalettes(e.target.checked);
                 }}
-                disabled={currentTheme && currentTheme.palettes.length > 0}
+                disabled={
+                  isLoading ||
+                  (currentTheme && currentTheme.palettes.length > 0)
+                }
               />
               <label htmlFor="generate-color-palettes" className="checkbox">
                 {currentTheme && currentTheme.palettes.length > 0
@@ -178,7 +188,7 @@ function App() {
                   : "Generate color palettes"}
               </label>
             </div>
-            <div className="checkbox-container">
+            <div className="checkbox-container" aria-disabled={isLoading}>
               <input
                 className="checkbox-input"
                 type="checkbox"
@@ -188,8 +198,9 @@ function App() {
                   setGenerateStateLayers(e.target.checked);
                 }}
                 disabled={
-                  currentTheme &&
-                  Object.keys(currentTheme.stateLayers).length > 0
+                  isLoading ||
+                  (currentTheme &&
+                    Object.keys(currentTheme.stateLayers).length > 0)
                 }
               />
               <label htmlFor="generate-state-layers" className="checkbox">
@@ -206,6 +217,7 @@ function App() {
               type="button"
               data-appearance="primary"
               className="action-button"
+              disabled={isLoading}
               onClick={currentTheme ? onUpdateClicked : onGenerateClicked}
             >
               {currentTheme ? "Update theme" : "Generate Theme"}
@@ -217,6 +229,7 @@ function App() {
                   data-appearance="secondary"
                   className="action-button"
                   onClick={onResetChanges}
+                  disabled={isLoading}
                 >
                   Reset changes
                 </button>
@@ -237,6 +250,18 @@ function App() {
         </div>
       </div>
       <Footer />
+      {isLoading && (
+        <ToastLoader progress={progress[0] / progress[1]}>
+          <span className="body-m primary">
+            {currentTheme
+              ? "Updating theme assets..."
+              : "Generating theme assets..."}
+          </span>
+          <span className="body-m secondary">
+            {progress[0].toString()}/{progress[1].toString()}
+          </span>
+        </ToastLoader>
+      )}
     </div>
   );
 }
