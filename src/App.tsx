@@ -61,7 +61,8 @@ function App() {
   const onUpdateClicked = () => {
     if (!currentTheme) return;
 
-    const newName = themeName != "" ? themeName : undefined;
+    const newName =
+      themeName != "" && themeName != currentTheme.name ? themeName : undefined;
     const color = colorPickerRef.current?.getColor();
     const newColor = color != currentTheme.source.color ? color : undefined;
     // TODO Display notification bar here
