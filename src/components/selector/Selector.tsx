@@ -4,6 +4,11 @@ import "./Selector.css";
 
 interface SelectorProps<T> {
   /**
+   * Label to display for the selection input field.
+   */
+  label: string | undefined;
+
+  /**
    * Item names / identifiers to use in the selection.
    */
   items: readonly T[];
@@ -42,6 +47,7 @@ interface SelectorProps<T> {
 }
 
 function Selector<T>({
+  label,
   items,
   currentItem,
   onItemChanged,
@@ -58,7 +64,11 @@ function Selector<T>({
 
   return (
     <div className="form-group">
-      <span className="input-label body-m">Theme</span>
+      <span
+        className={label ? "input-label body-m" : "input-label-hidden body-m"}
+      >
+        {label ? label : undefined}
+      </span>
       <div
         tabIndex={0}
         className={isOpen ? "select select-active" : "select"}

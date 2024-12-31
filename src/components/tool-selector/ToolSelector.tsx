@@ -29,6 +29,7 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({
 }: ToolSelectorProps) => {
   return (
     <Selector
+      label="Tool"
       items={tools}
       currentItem={currentTool}
       onItemChanged={onToolChanged}

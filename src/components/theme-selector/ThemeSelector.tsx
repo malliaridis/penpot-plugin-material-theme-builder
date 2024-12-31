@@ -50,6 +50,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
 
   return (
     <Selector
+      label="Theme"
       items={themeOptions}
       currentItem={currentTheme}
       onItemChanged={onThemeChanged}
