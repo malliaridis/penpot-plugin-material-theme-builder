@@ -1,12 +1,6 @@
 .option-icon {
   height: var(--spacing-20);
   width: var(--spacing-20);
-  color: var(--foreground-secondary);
-}
-
-.option-icon-small {
-  height: var(--spacing-20);
-  width: var(--spacing-20);
   padding: 2px;
   color: var(--foreground-secondary);
 }

@@ -1,0 +1,60 @@
+.content {
+    flex: 1;
+    overflow: auto;
+}
+
+.column-16 {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-16);
+}
+
+.action-buttons {
+    height: var(--spacing-24);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-8);
+}
+
+.action-button-row {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    gap: var(--spacing-8);
+}
+
+.action-button {
+    flex: 1;
+}
+
+.action-button-small {
+    padding: var(--spacing-4);
+    width: var(--spacing-32);
+    height: var(--spacing-32);
+
+    * {
+        color: var(--background-secondary);
+        width: var(--spacing-20);
+        height: var(--spacing-20);
+    }
+
+    &:focus * {
+        color: var(--foreground-secondary);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+
+    &:disabled * {
+        color: var(--background-quaternary);
+    }
+}
+
+.primary {
+    color: var(--foreground-primary);
+}
+
+.secondary {
+    color: var(--foreground-secondary);
+}
