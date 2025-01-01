@@ -1,7 +1,8 @@
-import { Repeat, Sliders } from "react-feather";
+import { Edit3, Repeat, Sliders } from "react-feather";
 import "./ToolSelector.css";
 import { Selector } from "../selector/Selector.tsx";
 import { Tool, tools } from "../../model/Tool.ts";
+import React from "react";
 
 interface ToolSelectorProps {
   /**
@@ -35,18 +36,23 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({
       onItemChanged={onToolChanged}
       itemToString={(tool) => {
         switch (tool) {
-          case "configure":
+          case "swap-variant":
             return "Restyle Shapes";
-          case "swap":
-            return "Swap Theme Values";
+          case "change-theme":
+            return "Change Theme";
+          case "replace-theme": {
+            return "Replace Theme Values";
+          }
         }
       }}
       itemToIcon={(tool) => {
         switch (tool) {
-          case "configure":
+          case "swap-variant":
             return <Sliders className="option-icon" />;
-          case "swap":
+          case "change-theme":
             return <Repeat className="option-icon" />;
+          case "replace-theme":
+            return <Edit3 className="option-icon" />;
         }
       }}
       disabled={disabled}
