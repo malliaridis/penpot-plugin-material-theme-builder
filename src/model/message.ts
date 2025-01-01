@@ -1,4 +1,4 @@
-import { LibraryColor } from "@penpot/plugin-types";
+import { LibraryColor, Shape } from "@penpot/plugin-types";
 
 /**
  * The source of the messages.
@@ -22,11 +22,16 @@ interface Message<T> {
   data: T;
 }
 
-type PenpotData = PenpotThemeData | PenpotColorsData | PenpotColorData;
+type PenpotData =
+  | PenpotThemeData
+  | PenpotColorsData
+  | PenpotShapesData
+  | PenpotColorData;
 
 type PluginData =
   | CreateLocalLibraryColorData
   | UpdateLibraryColorData
+  | SwapColorsData
   | DeleteLocalLibraryThemeData;
 
 interface CreateLocalLibraryColorData {
@@ -55,6 +60,24 @@ interface UpdateLibraryColorData {
   ref: number;
 }
 
+/**
+ * Color map that links a string / ID with a {@link LibraryColor}.
+ * Depending on the use case, a key may or may not be the ID of the same color
+ * as the value's color ID.
+ */
+type ColorMap = Record<string, LibraryColor | undefined>;
+
+/**
+ * Data object that holds color mappings for swapping colors.
+ */
+interface SwapColorsData {
+  /**
+   * Color mappings that links the ID of a {@link LibraryColor} that should be
+   * replaced with its value {@link LibraryColor}.
+   */
+  mappings: ColorMap;
+}
+
 interface DeleteLocalLibraryThemeData {
   themeName: string;
   ref: number;
@@ -66,6 +89,10 @@ interface PenpotThemeData {
 
 interface PenpotColorsData {
   colors: LibraryColor[];
+}
+
+interface PenpotShapesData {
+  shapes: Shape[];
 }
 
 interface PenpotColorData {
@@ -81,8 +108,11 @@ export type {
   PluginData,
   PenpotThemeData,
   PenpotColorsData,
+  PenpotShapesData,
   PenpotColorData,
   CreateLocalLibraryColorData,
   UpdateLibraryColorData,
+  SwapColorsData,
   DeleteLocalLibraryThemeData,
+  ColorMap,
 };

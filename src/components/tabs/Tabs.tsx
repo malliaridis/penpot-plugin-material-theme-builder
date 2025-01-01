@@ -7,11 +7,7 @@ interface TabsProps {
   onTabChange: (tab: number) => void;
 }
 
-const Tabs: React.FC<TabsProps> = ({
-  tabs,
-  currentTabIndex,
-  onTabChange,
-}) => {
+const Tabs: React.FC<TabsProps> = ({ tabs, currentTabIndex, onTabChange }) => {
   const isLoading = false;
 
   const tabNodes = tabs.map((tab) => {

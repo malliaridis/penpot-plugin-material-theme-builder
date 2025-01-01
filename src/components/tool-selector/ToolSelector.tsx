@@ -36,9 +36,9 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({
       itemToString={(tool) => {
         switch (tool) {
           case "configure":
-            return "Configure Theme";
+            return "Restyle Shapes";
           case "swap":
-            return "Swap Themes";
+            return "Swap Theme Values";
         }
       }}
       itemToIcon={(tool) => {

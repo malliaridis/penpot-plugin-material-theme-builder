@@ -3,7 +3,10 @@ import { useContext, useRef, useState } from "react";
 import { PenpotContext } from "../penpot/PenpotContext.ts";
 import ColorPicker, { ColorPickerRef } from "../color-picker/ColorPicker.tsx";
 import { PluginTheme } from "../../model/material.ts";
-import { MessageMaterialThemeService } from "../../services/MaterialThemeService.ts";
+import {
+  ThemeBuilderService,
+  MessageThemeBuilderService,
+} from "../../services/ThemeBuilderService.ts";
 import { ThemeSelector } from "../theme-selector/ThemeSelector.tsx";
 import { Trash } from "react-feather";
 import { ToastLoader } from "../toast-loader/ToastLoader.tsx";
@@ -24,7 +27,7 @@ const ThemeBuilder: React.FC = () => {
   const [progress, setProgress] = useState<number[] | undefined>(undefined);
   const isLoading = progress != undefined;
 
-  const materialService = new MessageMaterialThemeService();
+  const materialService: ThemeBuilderService = new MessageThemeBuilderService();
 
   const onProgress = (currentProgress: number, total: number) => {
     if (currentProgress != total) setProgress([currentProgress, total]);

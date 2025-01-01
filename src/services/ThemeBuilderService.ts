@@ -26,12 +26,12 @@ import {
   Message,
   MessageData,
   PenpotColorData,
-  PluginData,
   UpdateLibraryColorData,
 } from "../model/message.ts";
 import { LibraryColor } from "@penpot/plugin-types";
+import { MessageService } from "./MessageService.ts";
 
-interface MaterialThemeService {
+interface ThemeBuilderService {
   /**
    * Generates a theme with a given name, source color and options.
    *
@@ -84,15 +84,18 @@ interface MaterialThemeService {
 }
 
 /**
- * The default implementation of MaterielThemeService that is based on window
- * messages.
+ * The default implementation of {@link ThemeBuilderService} that is based on
+ * window messages.
  *
  * Since penpot can be used only from plugin.ts, messages are sent received
  * from this service. The messages sent are consumed by penpot.ts, which
  * generates new messages for successful actions. This service then consumes
  * messages sent by penpot.ts for each action to update the state.
  */
-class MessageMaterialThemeService implements MaterialThemeService {
+class MessageThemeBuilderService
+  extends MessageService
+  implements ThemeBuilderService
+{
   async generateTheme(
     themeName: string,
     sourceColor: string,
@@ -426,24 +429,7 @@ class MessageMaterialThemeService implements MaterialThemeService {
       ref,
     } as CreateLocalLibraryColorData);
   }
-
-  /**
-   * Sends a well-defined message to plugin.ts
-   *
-   * @param type The message type
-   * @param data Data to send
-   */
-  private sendMessage(type: string, data: object | undefined = undefined) {
-    parent.postMessage(
-      {
-        source: "plugin",
-        type,
-        data,
-      } as Message<PluginData>,
-      "*",
-    );
-  }
 }
 
-export { MessageMaterialThemeService };
-export type { MaterialThemeService };
+export { MessageThemeBuilderService };
+export type { ThemeBuilderService };

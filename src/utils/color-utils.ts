@@ -1,4 +1,4 @@
-import { LibraryColor } from "@penpot/plugin-types";
+import { Fill, LibraryColor } from "@penpot/plugin-types";
 import {
   JsonScheme,
   Palettes,
@@ -206,6 +206,36 @@ function getExpectedColorsCount(
   return expectedColorCount;
 }
 
+/**
+ * Sorts colors alphabetically.
+ *
+ * @param colors Color array to sort.
+ * @return The {@link colors} array sorted alphabetically.
+ */
+function sortedColors(colors: LibraryColor[]): LibraryColor[] {
+  return colors.sort(colorCompare);
+}
+
+/**
+ * Color compare function that can be used to sort colors alphabetically.
+ *
+ * @param color1 First color.
+ * @param color2 Second color.
+ */
+function colorCompare(color1: LibraryColor, color2: LibraryColor): number {
+  return (color1.path + color1.name).localeCompare(color2.path + color2.name);
+}
+
+/**
+ * Determines whether a value is a {@link Fill} array.
+ *
+ * @param value the value to check
+ * @return `true` iff the value is a Fill array
+ */
+function isFillArray(value: Fill[] | "mixed"): value is Fill[] {
+  return Array.isArray(value);
+}
+
 export {
   getValidSourceColor,
   argbWithOpacity,
@@ -213,4 +243,7 @@ export {
   flattenColors,
   getColorForPathSegments,
   getExpectedColorsCount,
+  sortedColors,
+  colorCompare,
+  isFillArray,
 };

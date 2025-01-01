@@ -1,0 +1,9 @@
+.radio-group {
+    display: flex;
+}
+
+.radio-group > .radio-container {
+    flex: 1;
+    margin: 0;
+    padding: var(--spacing-8);
+}
