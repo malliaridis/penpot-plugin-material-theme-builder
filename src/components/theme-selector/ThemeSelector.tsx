@@ -41,12 +41,8 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
   onThemeChanged,
   disabled,
 }: ThemeSelectorProps) => {
-  const themeOptions: (PluginTheme | undefined)[] = [];
-  if (allowNewTheme) {
-    themeOptions.push(undefined, ...themes);
-  } else {
-    themeOptions.push(...themes);
-  }
+  const themeOptions: (PluginTheme | undefined)[] = [...themes];
+  if (allowNewTheme) themeOptions.unshift(undefined);
 
   return (
     <Selector
