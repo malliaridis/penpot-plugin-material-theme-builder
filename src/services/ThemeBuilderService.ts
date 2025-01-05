@@ -28,6 +28,7 @@ import {
   PenpotColorData,
   UpdateLibraryColorData,
 } from "../model/message.ts";
+import { ToastData } from "../model/ToastData.ts";
 import { LibraryColor } from "@penpot/plugin-types";
 import { MessageService } from "./MessageService.ts";
 
@@ -39,16 +40,12 @@ interface ThemeBuilderService {
    * @param sourceColor Source color to use.
    * @param withTonalPalettes Whether to generate tonal palette colors.
    * @param withStateLayers Whether to generate state layer colors.
-   * @param onProgress Callback function that is called for each step.
-   * progress is the current progress, total is the total step count.
-   * @return Promise with the new plugin theme on success.
    */
   generateTheme(
     themeName: string,
     sourceColor: string,
     withTonalPalettes: boolean,
     withStateLayers: boolean,
-    onProgress: (progress: number, total: number) => void,
   ): Promise<PluginTheme>;
 
   /**
@@ -62,9 +59,6 @@ interface ThemeBuilderService {
    * if not present.
    * @param withStateLayers Whether state layer colors should be generated if
    * not present.
-   * @param onProgress Callback function that is called for each step.
-   * progress is the current progress, total is the total step count.
-   * @return Promise with the updated plugin theme on success.
    */
   updateTheme(
     theme: PluginTheme,
@@ -72,7 +66,6 @@ interface ThemeBuilderService {
     sourceColor: string | undefined,
     withTonalPalettes: boolean,
     withStateLayers: boolean,
-    onProgress: (progress: number, total: number) => void,
   ): Promise<PluginTheme>;
 
   /**
@@ -101,7 +94,6 @@ class MessageThemeBuilderService
     sourceColor: string,
     withTonalPalettes = false,
     withStateLayers = true,
-    onProgress: (progress: number, total: number) => void,
   ): Promise<PluginTheme> {
     // Create a reference for identifying any color created event
     const ref = Math.random();
@@ -113,6 +105,12 @@ class MessageThemeBuilderService
     let count = 0;
     const theme: Theme = themeFromSourceColor(argbFromHex(sourceColor));
     const colors: LibraryColor[] = [];
+
+    this.onUpdate({
+      type: "progress-started",
+      message: "Generating theme...",
+      ref,
+    } as ToastData);
 
     return await new Promise(
       (
@@ -132,9 +130,21 @@ class MessageThemeBuilderService
           if (data.ref != ref) return;
 
           colors.push(data.color);
-          onProgress(++count, expectedColorCount);
+          this.onUpdate({
+            type: "progress-updated",
+            message: "Generating theme assets...",
+            loaded: ++count,
+            total: expectedColorCount,
+            ref,
+          } as ToastData);
 
           if (colors.length == expectedColorCount) {
+            this.onUpdate({
+              type: "progress-updated",
+              message: "Finalizing theme generation...",
+              ref,
+            } as ToastData);
+
             const pluginTheme = mapColorsToThemes(colors);
             if (pluginTheme.length != 1) {
               reject(
@@ -146,6 +156,11 @@ class MessageThemeBuilderService
               window.removeEventListener("message", listener);
               resolve(pluginTheme[0]);
             }
+
+            this.onUpdate({
+              type: "progress-completed",
+              ref,
+            } as ToastData);
           }
         };
 
@@ -184,11 +199,16 @@ class MessageThemeBuilderService
     sourceColor: string | undefined,
     withTonalPalettes: boolean,
     withStateLayers: boolean,
-    onProgress: (progress: number, total: number) => void,
   ): Promise<PluginTheme> {
     // Create a reference for identifying any operation-related event
     const ref = Math.random();
     let count = 0;
+
+    this.onUpdate({
+      type: "progress-started",
+      message: "Preparing theme update...",
+      ref,
+    } as ToastData);
 
     // Generate a theme if there is a new source color
     const theme = sourceColor
@@ -238,9 +258,21 @@ class MessageThemeBuilderService
           if (data.ref != ref) return;
 
           updatedColors.push(data.color);
-          onProgress(++count, expectedColorCount);
+          this.onUpdate({
+            type: "progress-updated",
+            message: "Updating theme assets...",
+            loaded: ++count,
+            total: expectedColorCount,
+            ref,
+          } as ToastData);
 
           if (updatedColors.length == expectedColorCount) {
+            this.onUpdate({
+              type: "progress-updated",
+              message: "Finalizing theme update...",
+              ref,
+            } as ToastData);
+
             const pluginTheme = mapColorsToThemes(updatedColors);
             if (pluginTheme.length != 1) {
               reject(
@@ -252,6 +284,11 @@ class MessageThemeBuilderService
               window.removeEventListener("message", listener);
               resolve(pluginTheme[0]);
             }
+
+            this.onUpdate({
+              type: "progress-completed",
+              ref,
+            } as ToastData);
           }
         };
 

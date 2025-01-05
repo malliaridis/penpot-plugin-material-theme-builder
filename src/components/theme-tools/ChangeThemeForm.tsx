@@ -7,9 +7,11 @@ import {
   MessageThemeToolsService,
   ThemeToolsService,
 } from "../../services/ThemeToolsService.ts";
+import { ToastContext } from "../toast-loader/ToastContext.ts";
 
 const ChangeThemeForm: FC = () => {
   const penpotContext = useContext(PenpotContext);
+  const toastContext = useContext(ToastContext);
   const currentSelection = penpotContext.currentSelection;
   const [toReplace, setToReplace] = useState<PluginTheme | undefined>();
   const [replaceWith, setReplaceWith] = useState<PluginTheme | undefined>();
@@ -25,7 +27,9 @@ const ChangeThemeForm: FC = () => {
     if (replaceWith?.name == theme?.name) setReplaceWith(undefined);
   };
 
-  const toolService: ThemeToolsService = new MessageThemeToolsService();
+  const toolService: ThemeToolsService = new MessageThemeToolsService(
+    toastContext.update,
+  );
   const onChangeClicked = () => {
     if (!toReplace || !replaceWith) return;
 
@@ -36,8 +40,7 @@ const ChangeThemeForm: FC = () => {
     );
   };
 
-  // TODO Implement isLoading
-  const isLoading = false;
+  const isDisabled = toastContext.isProcessing;
   const canChangeTheme = toReplace && replaceWith;
   const themesMatch =
     !toReplace || !replaceWith || doThemesMatch(toReplace, replaceWith);
@@ -47,7 +50,7 @@ const ChangeThemeForm: FC = () => {
       <ThemeSelector
         label="Swap references of"
         themes={penpotContext.allThemes}
-        disabled={isLoading}
+        disabled={isDisabled}
         currentTheme={toReplace}
         allowNewTheme={false}
         useColorAsIcon={true}
@@ -57,7 +60,7 @@ const ChangeThemeForm: FC = () => {
       <ThemeSelector
         label="with references from"
         themes={replaceWithThemes}
-        disabled={isLoading}
+        disabled={isDisabled}
         currentTheme={replaceWith}
         allowNewTheme={false}
         useColorAsIcon={true}
@@ -69,7 +72,7 @@ const ChangeThemeForm: FC = () => {
           type="button"
           data-appearance="primary"
           className="action-button"
-          disabled={isLoading || !canChangeTheme}
+          disabled={isDisabled || !canChangeTheme}
           onClick={onChangeClicked}
         >
           {currentSelection.length > 0

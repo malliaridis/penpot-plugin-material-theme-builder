@@ -7,9 +7,11 @@ import {
   MessageThemeToolsService,
   ThemeToolsService,
 } from "../../services/ThemeToolsService.ts";
+import { ToastContext } from "../toast-loader/ToastContext.ts";
 
 const ConfigureThemeForm: FC = () => {
   const penpotContext = useContext(PenpotContext);
+  const toastContext = useContext(ToastContext);
   const currentSelection = penpotContext.currentSelection;
   const firstTheme = penpotContext.allThemes[0];
   const [currentTheme, onThemeChanged] = useState<PluginTheme | undefined>(
@@ -17,8 +19,10 @@ const ConfigureThemeForm: FC = () => {
   );
   const [useDarkTheme, setUseDarkTheme] = useState(false);
 
-  const toolService: ThemeToolsService = new MessageThemeToolsService();
-  const isLoading = false;
+  const toolService: ThemeToolsService = new MessageThemeToolsService(
+    toastContext.update,
+  );
+  const isDisabled = toastContext.isProcessing;
 
   const onUpdateClicked = () => {
     if (!currentTheme) return;
@@ -35,7 +39,7 @@ const ConfigureThemeForm: FC = () => {
       <ThemeSelector
         label="Theme"
         themes={penpotContext.allThemes}
-        disabled={isLoading}
+        disabled={isDisabled}
         currentTheme={currentTheme}
         allowNewTheme={false}
         useColorAsIcon={true}
@@ -83,7 +87,7 @@ const ConfigureThemeForm: FC = () => {
           type="button"
           data-appearance="primary"
           className="action-button"
-          disabled={isLoading}
+          disabled={isDisabled}
           onClick={onUpdateClicked}
         >
           {currentSelection.length > 0 ? "Update Selection" : "Update Page"}

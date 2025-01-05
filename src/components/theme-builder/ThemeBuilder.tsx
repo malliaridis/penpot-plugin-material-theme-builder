@@ -1,5 +1,5 @@
 import "./ThemeBuilder.css";
-import { useContext, useRef, useState } from "react";
+import { FC, useContext, useRef, useState } from "react";
 import { PenpotContext } from "../penpot/PenpotContext.ts";
 import ColorPicker, { ColorPickerRef } from "../color-picker/ColorPicker.tsx";
 import { PluginTheme } from "../../model/material.ts";
@@ -9,10 +9,11 @@ import {
 } from "../../services/ThemeBuilderService.ts";
 import { ThemeSelector } from "../theme-selector/ThemeSelector.tsx";
 import { Trash } from "react-feather";
-import { ToastLoader } from "../toast-loader/ToastLoader.tsx";
+import { ToastContext } from "../toast-loader/ToastContext.ts";
 
-const ThemeBuilder: React.FC = () => {
+const ThemeBuilder: FC = () => {
   const penpotContext = useContext(PenpotContext);
+  const toastContext = useContext(ToastContext);
   const colorPickerRef = useRef<ColorPickerRef>(null);
   const [currentTheme, setCurrentTheme] = useState<PluginTheme | undefined>(
     undefined,
@@ -24,15 +25,11 @@ const ThemeBuilder: React.FC = () => {
   const [generateStateLayers, setGenerateStateLayers] =
     useState<boolean>(false);
 
-  const [progress, setProgress] = useState<number[] | undefined>(undefined);
-  const isLoading = progress != undefined;
+  const isDisabled = toastContext.isProcessing;
 
-  const materialService: ThemeBuilderService = new MessageThemeBuilderService();
-
-  const onProgress = (currentProgress: number, total: number) => {
-    if (currentProgress != total) setProgress([currentProgress, total]);
-    else setProgress(undefined);
-  };
+  const materialService: ThemeBuilderService = new MessageThemeBuilderService(
+    toastContext.update,
+  );
 
   const onGenerateClicked = () => {
     const theme = themeName != "" ? themeName : "material-theme";
@@ -44,13 +41,7 @@ const ThemeBuilder: React.FC = () => {
 
     // TODO Display notification bar here
     materialService
-      .generateTheme(
-        theme,
-        color,
-        generateTonalPalettes,
-        generateStateLayers,
-        onProgress,
-      )
+      .generateTheme(theme, color, generateTonalPalettes, generateStateLayers)
       .then((theme) => {
         const themes = penpotContext.themes;
         themes.push(theme);
@@ -59,6 +50,7 @@ const ThemeBuilder: React.FC = () => {
       })
       .catch((err: unknown) => {
         if (err instanceof Error) console.error(err.message);
+        // TODO Dismiss toast loader after some time of displaying the error
       });
   };
 
@@ -77,7 +69,6 @@ const ThemeBuilder: React.FC = () => {
         newColor,
         generateTonalPalettes,
         generateStateLayers,
-        onProgress,
       )
       .then((theme) => {
         const updatedThemes = penpotContext.themes;
@@ -135,7 +126,7 @@ const ThemeBuilder: React.FC = () => {
         <ThemeSelector
           label="Theme"
           themes={penpotContext.themes}
-          disabled={isLoading}
+          disabled={isDisabled}
           currentTheme={currentTheme}
           allowNewTheme={true}
           useColorAsIcon={false}
@@ -151,7 +142,7 @@ const ThemeBuilder: React.FC = () => {
             placeholder={currentTheme ? currentTheme.name : "material-theme"}
             id="input-theme-name"
             value={themeName}
-            disabled={isLoading}
+            disabled={isDisabled}
             onChange={(e) => {
               setThemeName(e.target.value);
             }}
@@ -159,13 +150,13 @@ const ThemeBuilder: React.FC = () => {
         </div>
         <ColorPicker
           ref={colorPickerRef}
-          disabled={isLoading}
+          disabled={isDisabled}
           color={currentTheme?.source.color}
         />
 
         <div>
           <span className="body-m">Additional Options</span>
-          <div className="checkbox-container" aria-disabled={isLoading}>
+          <div className="checkbox-container" aria-disabled={isDisabled}>
             <input
               className="checkbox-input"
               type="checkbox"
@@ -175,7 +166,7 @@ const ThemeBuilder: React.FC = () => {
                 setGenerateTonalPalettes(e.target.checked);
               }}
               disabled={
-                isLoading || (currentTheme && currentTheme.palettes.length > 0)
+                isDisabled || (currentTheme && currentTheme.palettes.length > 0)
               }
             />
             <label htmlFor="generate-color-palettes" className="checkbox">
@@ -184,7 +175,7 @@ const ThemeBuilder: React.FC = () => {
                 : "Generate color palettes"}
             </label>
           </div>
-          <div className="checkbox-container" aria-disabled={isLoading}>
+          <div className="checkbox-container" aria-disabled={isDisabled}>
             <input
               className="checkbox-input"
               type="checkbox"
@@ -194,7 +185,7 @@ const ThemeBuilder: React.FC = () => {
                 setGenerateStateLayers(e.target.checked);
               }}
               disabled={
-                isLoading ||
+                isDisabled ||
                 (currentTheme &&
                   Object.keys(currentTheme.stateLayers).length > 0)
               }
@@ -212,7 +203,7 @@ const ThemeBuilder: React.FC = () => {
             type="button"
             data-appearance="primary"
             className="action-button"
-            disabled={isLoading}
+            disabled={isDisabled}
             onClick={currentTheme ? onUpdateClicked : onGenerateClicked}
           >
             {currentTheme ? "Update theme" : "Generate Theme"}
@@ -224,7 +215,7 @@ const ThemeBuilder: React.FC = () => {
                 data-appearance="secondary"
                 className="action-button"
                 onClick={onResetChanges}
-                disabled={isLoading}
+                disabled={isDisabled}
               >
                 Reset changes
               </button>
@@ -243,18 +234,6 @@ const ThemeBuilder: React.FC = () => {
           )}
         </div>
       </div>
-      {isLoading && (
-        <ToastLoader progress={progress[0] / progress[1]}>
-          <span className="body-m primary">
-            {currentTheme
-              ? "Updating theme assets..."
-              : "Generating theme assets..."}
-          </span>
-          <span className="body-m secondary">
-            {progress[0].toString()}/{progress[1].toString()}
-          </span>
-        </ToastLoader>
-      )}
     </div>
   );
 };

@@ -2,9 +2,11 @@ import { FC, useContext, useState } from "react";
 import { PenpotContext } from "../penpot/PenpotContext.ts";
 import { PluginTheme } from "../../model/material.ts";
 import { ThemeSelector } from "../theme-selector/ThemeSelector.tsx";
+import { ToastContext } from "../toast-loader/ToastContext.ts";
 
 const SwapValuesForm: FC = () => {
   const penpotContext = useContext(PenpotContext);
+  const toastContext = useContext(ToastContext);
   const firstTheme = penpotContext.themes[0];
   // Only local themes should be set in themeFrom
   const [themeFrom, setThemeFrom] = useState<PluginTheme | undefined>(
@@ -20,15 +22,18 @@ const SwapValuesForm: FC = () => {
     return theme.name != themeFrom?.name;
   });
 
-  // TODO Implement isLoading
-  const isLoading = false;
+  // TODO Use tool service once component is implemented
+  // const toolService: ThemeToolsService = new MessageThemeToolsService(
+  //   toastContext.update,
+  // );
+  const isDisabled = toastContext.isProcessing;
 
   return (
     <>
       <ThemeSelector
         label="Replace theme values of"
         themes={penpotContext.themes}
-        disabled={isLoading}
+        disabled={isDisabled}
         currentTheme={themeFrom}
         allowNewTheme={false}
         useColorAsIcon={true}
@@ -38,7 +43,7 @@ const SwapValuesForm: FC = () => {
       <ThemeSelector
         label="with values from"
         themes={themesWith}
-        disabled={isLoading}
+        disabled={isDisabled}
         currentTheme={themeWith}
         allowNewTheme={false}
         useColorAsIcon={true}
