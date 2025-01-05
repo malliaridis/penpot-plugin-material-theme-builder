@@ -34,10 +34,8 @@ const PenpotContextProvider: React.FC<PenpotContextProviderProps> = ({
     );
   };
 
-  // Listen plugin.ts messages
-  window.addEventListener(
-    "message",
-    (event: MessageEvent<Message<MessageData>>) => {
+  useEffect(() => {
+    const listener = (event: MessageEvent<Message<MessageData>>) => {
       if (event.data.source != "penpot") {
         // Ignore any event not coming from penpot
         return;
@@ -62,8 +60,15 @@ const PenpotContextProvider: React.FC<PenpotContextProviderProps> = ({
           break;
         }
       }
-    },
-  );
+    };
+
+    // Listen plugin.ts messages
+    window.addEventListener("message", listener);
+
+    return () => {
+      window.removeEventListener("message", listener);
+    };
+  });
 
   useEffect(() => {
     // Request library colors to initialize themes
@@ -81,7 +86,7 @@ const PenpotContextProvider: React.FC<PenpotContextProviderProps> = ({
       value={{
         allThemes,
         themes,
-        currentSelection: currentSelection,
+        currentSelection,
         setThemes: sortBeforeSetThemes,
       }}
     >
