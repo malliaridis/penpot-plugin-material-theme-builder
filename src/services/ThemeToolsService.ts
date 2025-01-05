@@ -1,7 +1,14 @@
 import { MessageService } from "./MessageService.ts";
-import { ColorMap, SwapColorsData } from "../model/message.ts";
+import {
+  ColorMap,
+  Message,
+  MessageData,
+  PenpotMappingData,
+  SwapColorsData,
+} from "../model/message.ts";
 import { PluginTheme } from "../model/material.ts";
 import { colorCompare, flattenColors } from "../utils/color-utils.ts";
+import { ToastData } from "../model/ToastData.ts";
 
 /**
  * Theme tools service that provides various operations that can be applied to
@@ -48,6 +55,14 @@ class MessageThemeToolsService
     theme: PluginTheme,
     useDarkTheme: boolean,
   ): Promise<void> {
+    const ref = Math.random();
+
+    this.onUpdate({
+      type: "progress-started",
+      message: "Preparing color mappings...",
+      ref,
+    } as ToastData);
+
     const mappings = this.createThemeMappingsFrom(theme, useDarkTheme);
 
     if (!mappings)
@@ -57,18 +72,7 @@ class MessageThemeToolsService
       ? "update-current-selection-colors"
       : "update-current-page-colors";
 
-    // TODO Display notification
-
-    // TODO Update notification during progress
-
-    // TODO Hide notification on completion
-
-    this.sendMessage(updateKey, {
-      mappings,
-    } as SwapColorsData);
-
-    // TODO remove below promise once notification bar implemented
-    return Promise.resolve();
+    return this.createColorUpdatePromise(mappings, ref, updateKey);
   }
 
   replaceThemes(
@@ -76,24 +80,21 @@ class MessageThemeToolsService
     toReplace: PluginTheme,
     replaceWith: PluginTheme,
   ): Promise<void> {
+    const ref = Math.random();
+
+    this.onUpdate({
+      type: "progress-started",
+      message: "Preparing theme mappings...",
+      ref,
+    } as ToastData);
+
     const mappings = this.createThemeMappingsWith(toReplace, replaceWith);
 
     const updateKey = forSelection
       ? "update-current-selection-colors"
       : "update-current-page-colors";
 
-    // TODO Display notification
-
-    // TODO Update notification during progress
-
-    // TODO Hide notification on completion
-
-    this.sendMessage(updateKey, {
-      mappings,
-    } as SwapColorsData);
-
-    // TODO remove below promise once notification bar implemented
-    return Promise.resolve();
+    return this.createColorUpdatePromise(mappings, ref, updateKey);
   }
 
   private createThemeMappingsFrom(
@@ -150,6 +151,78 @@ class MessageThemeToolsService
         }) ?? color;
       return record;
     }, {});
+  }
+
+  private createColorUpdatePromise(
+    mappings: ColorMap,
+    ref: number,
+    updateKey: string,
+  ): Promise<void> {
+    let shapesFound = 0;
+    let shapesIterated = 0;
+    let shapesUpdated = 0;
+
+    return new Promise((resolve: () => void) => {
+      const listener = (event: MessageEvent<Message<MessageData>>) => {
+        if (
+          event.data.source != "penpot" ||
+          (event.data.type != "shape-colors-updated" &&
+            event.data.type != "shape-color-mapping-started" &&
+            event.data.type != "shape-color-mapping-completed")
+        ) {
+          return;
+        }
+
+        // Right now we are only mapping colors, so we receive color data
+        const data = event.data.data as PenpotMappingData;
+
+        if (data.ref != ref) return;
+
+        if (event.data.type == "shape-color-mapping-started") {
+          shapesFound += data.size ?? 0;
+          this.onUpdate({
+            type: "progress-updated",
+            loaded: shapesIterated,
+            total: shapesFound,
+            message: "Updating shapes...",
+            ref,
+          } as ToastData);
+        }
+
+        if (event.data.type == "shape-colors-updated") {
+          if (data.updated) shapesUpdated++;
+
+          this.onUpdate({
+            type: "progress-updated",
+            loaded: ++shapesIterated,
+            total: shapesFound,
+            message: "Updating shapes...",
+            ref,
+          } as ToastData);
+        }
+
+        if (
+          event.data.type == "shape-color-mapping-completed" &&
+          shapesIterated == shapesFound
+        ) {
+          this.onUpdate({
+            type: "progress-completed",
+            message: `${shapesUpdated.toString()} shapes updated.`,
+            ref,
+          } as ToastData);
+
+          window.removeEventListener("message", listener);
+          resolve();
+        }
+      };
+
+      window.addEventListener("message", listener);
+
+      this.sendMessage(updateKey, {
+        mappings,
+        ref,
+      } as SwapColorsData);
+    });
   }
 }
 

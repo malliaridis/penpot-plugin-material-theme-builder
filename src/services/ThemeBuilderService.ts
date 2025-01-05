@@ -152,15 +152,16 @@ class MessageThemeBuilderService
                   `Expected exactly one theme to be generated, but got ${pluginTheme.length.toString()}`,
                 ),
               );
-            } else {
-              window.removeEventListener("message", listener);
-              resolve(pluginTheme[0]);
             }
 
             this.onUpdate({
               type: "progress-completed",
+              message: "Theme generated.",
               ref,
             } as ToastData);
+
+            window.removeEventListener("message", listener);
+            resolve(pluginTheme[0]);
           }
         };
 
@@ -221,7 +222,7 @@ class MessageThemeBuilderService
 
     colors.forEach((color) => {
       // Generate updates for all colors in the current pluginTheme
-      updates.push(this.createColorUpdate(color, theme, themeName, ref));
+      updates.push(this.createColorUpdate(color, ref, theme, themeName));
     });
 
     const shouldGenerateStateLayers =
@@ -280,15 +281,16 @@ class MessageThemeBuilderService
                   `Expected exactly one theme to be generated, but got ${pluginTheme.length.toString()}`,
                 ),
               );
-            } else {
-              window.removeEventListener("message", listener);
-              resolve(pluginTheme[0]);
             }
 
             this.onUpdate({
               type: "progress-completed",
+              message: "Theme updated.",
               ref,
             } as ToastData);
+
+            window.removeEventListener("message", listener);
+            resolve(pluginTheme[0]);
           }
         };
 
@@ -344,9 +346,9 @@ class MessageThemeBuilderService
 
   private createColorUpdate(
     color: LibraryColor,
-    theme: Theme | undefined,
-    themeName: string | undefined,
     ref: number,
+    theme?: Theme,
+    themeName?: string,
   ): Partial<UpdateLibraryColorData> {
     const segments = color.path.split(" / ");
     const update: Partial<UpdateLibraryColorData> = { color, ref };

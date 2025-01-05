@@ -7,6 +7,7 @@ import {
   PenpotColorData,
   PenpotColorsData,
   PenpotData,
+  PenpotMappingData,
   PenpotShapesData,
   SwapColorsData,
   UpdateLibraryColorData,
@@ -47,13 +48,13 @@ penpot.ui.onMessage<Message<MessageData>>((message) => {
       break;
     }
     case "update-current-page-colors": {
-      const { mappings } = message.data as SwapColorsData;
-      updateCurrentPageColors(mappings);
+      const { mappings, ref } = message.data as SwapColorsData;
+      updateCurrentPageColors(mappings, ref);
       break;
     }
     case "update-current-selection-colors": {
-      const { mappings } = message.data as SwapColorsData;
-      updateCurrentSelectionColors(mappings);
+      const { mappings, ref } = message.data as SwapColorsData;
+      updateCurrentSelectionColors(mappings, ref);
       break;
     }
     case "delete-library-theme": {
@@ -159,35 +160,57 @@ function updateLibraryColor(update: UpdateLibraryColorData) {
   } as Message<PenpotData>);
 }
 
-function updateCurrentPageColors(mappings: ColorMap) {
+function updateCurrentPageColors(mappings: ColorMap, ref: number) {
   const page = penpot.currentPage;
   if (!page) {
     console.error("Current page not available.");
     return;
   }
 
-  updatePageColors(penpot.currentPage, mappings);
+  updatePageColors(penpot.currentPage, mappings, ref);
 }
 
-function updateCurrentSelectionColors(mappings: ColorMap) {
+function updateCurrentSelectionColors(mappings: ColorMap, ref: number) {
   const selection = penpot.selection;
   if (selection.length == 0) {
     console.error("Current selection is empty.");
     return;
   }
 
-  updateShapeColors(selection, mappings);
+  updateShapeColors(selection, mappings, ref);
 }
 
-function updatePageColors(page: Page, mappings: ColorMap) {
+function updatePageColors(page: Page, mappings: ColorMap, ref: number) {
   const shapes = page.findShapes();
-  updateShapeColors(shapes, mappings);
+  updateShapeColors(shapes, mappings, ref);
 }
 
-function updateShapeColors(shapes: Shape[], mappings: ColorMap) {
+function updateShapeColors(shapes: Shape[], mappings: ColorMap, ref: number) {
+  penpot.ui.sendMessage({
+    source: "penpot",
+    type: "shape-color-mapping-started",
+    data: {
+      size: shapes.length,
+      ref,
+    } as PenpotMappingData,
+  });
+
   shapes.forEach((shape) => {
     const fills = shape.fills;
-    if (!isFillArray(fills)) return;
+    let updated = false;
+
+    if (!isFillArray(fills)) {
+      penpot.ui.sendMessage({
+        source: "penpot",
+        type: "shape-colors-updated",
+        data: {
+          id: shape.id,
+          updated,
+          ref,
+        } as PenpotMappingData,
+      } as Message<PenpotData>);
+      return;
+    }
 
     // Use mappings to replace the curren fills
     shape.fills = fills.map((fill) => {
@@ -201,12 +224,33 @@ function updateShapeColors(shapes: Shape[], mappings: ColorMap) {
         const actualColor = libraryColors.find(
           (color) => color.id == mappedColor.id,
         );
-        if (actualColor) return actualColor.asFill();
+        if (actualColor) {
+          updated = true;
+          return actualColor.asFill();
+        }
       }
       return fill;
     });
 
-    if (hasChildren(shape)) updateShapeColors(shape.children, mappings);
+    penpot.ui.sendMessage({
+      source: "penpot",
+      type: "shape-colors-updated",
+      data: {
+        id: shape.id,
+        updated,
+        ref,
+      } as PenpotMappingData,
+    } as Message<PenpotData>);
+
+    if (hasChildren(shape)) updateShapeColors(shape.children, mappings, ref);
+  });
+
+  penpot.ui.sendMessage({
+    source: "penpot",
+    type: "shape-color-mapping-completed",
+    data: {
+      ref,
+    } as PenpotMappingData,
   });
 }
 

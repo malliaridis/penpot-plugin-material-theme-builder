@@ -24,6 +24,7 @@ interface Message<T> {
 
 type PenpotData =
   | PenpotThemeData
+  | PenpotMappingData
   | PenpotColorsData
   | PenpotShapesData
   | PenpotColorData;
@@ -49,11 +50,11 @@ interface UpdateLibraryColorData {
   /**
    * New path of the color to set
    */
-  path: string;
+  path?: string;
   /**
    * New color value to use
    */
-  value: string;
+  value?: string;
   /**
    * Reference number for traceability.
    */
@@ -76,6 +77,7 @@ interface SwapColorsData {
    * replaced with its value {@link LibraryColor}.
    */
   mappings: ColorMap;
+  ref: number;
 }
 
 interface DeleteLocalLibraryThemeData {
@@ -85,6 +87,28 @@ interface DeleteLocalLibraryThemeData {
 
 interface PenpotThemeData {
   theme: string;
+}
+
+/**
+ * Mapping data sent by penpot when mapping assets. Currently not used.
+ */
+interface PenpotMappingData {
+  /**
+   * The ID of the shape that was checked.
+   */
+  id?: string;
+  /**
+   * The mappings that are to be processed, if starting the mapping.
+   */
+  size?: number;
+  /**
+   * Whether the shape with the ID was updated.
+   */
+  updated: boolean;
+  /**
+   * Reference number.
+   */
+  ref: number;
 }
 
 interface PenpotColorsData {
@@ -107,6 +131,7 @@ export type {
   PenpotData,
   PluginData,
   PenpotThemeData,
+  PenpotMappingData,
   PenpotColorsData,
   PenpotShapesData,
   PenpotColorData,

@@ -25,11 +25,11 @@ const ThemeBuilder: FC = () => {
   const [generateStateLayers, setGenerateStateLayers] =
     useState<boolean>(false);
 
-  const isDisabled = toastContext.isProcessing;
-
   const materialService: ThemeBuilderService = new MessageThemeBuilderService(
     toastContext.update,
   );
+
+  const isDisabled = toastContext.isProcessing;
 
   const onGenerateClicked = () => {
     const theme = themeName != "" ? themeName : "material-theme";
@@ -39,13 +39,10 @@ const ThemeBuilder: FC = () => {
       return;
     }
 
-    // TODO Display notification bar here
     materialService
       .generateTheme(theme, color, generateTonalPalettes, generateStateLayers)
       .then((theme) => {
-        const themes = penpotContext.themes;
-        themes.push(theme);
-        penpotContext.setThemes(themes);
+        penpotContext.refreshThemes();
         onThemeChanged(theme);
       })
       .catch((err: unknown) => {
@@ -57,8 +54,12 @@ const ThemeBuilder: FC = () => {
   const onUpdateClicked = () => {
     if (!currentTheme) return;
 
-    const newName =
-      themeName != "" && themeName != currentTheme.name ? themeName : undefined;
+    // Always provide a theme name to (re)generate a path, as with the latest
+    // penpot updates, the path is reset after setting the color value
+    const newName = themeName != "" ? themeName : currentTheme.name;
+    // const newName =
+    //   themeName != "" && themeName != currentTheme.name ? themeName : undefined;
+
     const color = colorPickerRef.current?.getColor();
     const newColor = color != currentTheme.source.color ? color : undefined;
     // TODO Display notification bar here

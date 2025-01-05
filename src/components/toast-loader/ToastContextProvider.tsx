@@ -55,7 +55,16 @@ const ToastContextProvider: FC<ToastContextProviderProps> = ({ children }) => {
         break;
       case "progress-completed":
         setToasts(toasts.filter((ref) => ref != data.ref));
-        toast.dismiss(data.ref);
+        toast.update(data.ref, {
+          autoClose: 3000,
+          render: (
+            <div className="toast-content">
+              <span className="body-m primary">{data.message}</span>
+            </div>
+          ),
+          // reset progress, otherwise it will not autoClose
+          progress: undefined,
+        });
         break;
     }
   };
@@ -76,6 +85,7 @@ const ToastContextProvider: FC<ToastContextProviderProps> = ({ children }) => {
           hideProgressBar={false}
           closeOnClick={false}
           draggable={false}
+          pauseOnFocusLoss={false}
           transition={Zoom}
         />
       </>

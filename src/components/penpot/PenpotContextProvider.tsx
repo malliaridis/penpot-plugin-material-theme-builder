@@ -70,8 +70,7 @@ const PenpotContextProvider: React.FC<PenpotContextProviderProps> = ({
     };
   });
 
-  useEffect(() => {
-    // Request library colors to initialize themes
+  const refreshThemes = () => {
     parent.postMessage(
       {
         source: "plugin",
@@ -79,6 +78,11 @@ const PenpotContextProvider: React.FC<PenpotContextProviderProps> = ({
       } as Message<PluginData>,
       "*",
     );
+  };
+
+  useEffect(() => {
+    // Request library colors to initialize themes
+    refreshThemes();
   }, []);
 
   return (
@@ -88,6 +92,7 @@ const PenpotContextProvider: React.FC<PenpotContextProviderProps> = ({
         themes,
         currentSelection,
         setThemes: sortBeforeSetThemes,
+        refreshThemes,
       }}
     >
       {children}

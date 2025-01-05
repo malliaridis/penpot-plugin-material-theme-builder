@@ -23,6 +23,10 @@ interface IPenpotContext {
    * Current selection as reported by penpot.
    */
   currentSelection: Shape[];
+  /**
+   * Refresh the themes currently loaded.
+   */
+  refreshThemes: () => void;
 }
 
 const PenpotContext = createContext<IPenpotContext>({
@@ -30,6 +34,7 @@ const PenpotContext = createContext<IPenpotContext>({
   themes: [],
   currentSelection: [],
   setThemes: () => undefined,
+  refreshThemes: () => undefined,
 });
 
 export { PenpotContext };
