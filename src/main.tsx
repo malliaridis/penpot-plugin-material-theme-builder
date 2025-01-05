@@ -2,7 +2,12 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import App from "./App.tsx";
-import { Message, PluginData } from "./model/message.ts";
+import {
+  Message,
+  PenpotData,
+  PenpotThemeData,
+  PluginData,
+} from "./model/message.ts";
 import { PenpotContextProvider } from "./components/penpot/PenpotContextProvider.tsx";
 
 // get the current theme from the URL
@@ -34,3 +39,13 @@ if (rootElement) {
 } else {
   console.error("Root element not found");
 }
+
+// Listen to theme changes from plugin.ts
+window.addEventListener(
+  "message",
+  (event: MessageEvent<Message<PenpotData>>) => {
+    if (event.data.source === "penpot" && event.data.type === "theme-changed") {
+      document.body.dataset.theme = (event.data.data as PenpotThemeData).theme;
+    }
+  },
+);

@@ -42,3 +42,19 @@ p {
   border: 1px solid var(--foreground-secondary);
   cursor: not-allowed;
 }
+
+.primary {
+  color: var(--foreground-primary);
+}
+
+.secondary {
+  color: var(--foreground-secondary);
+}
+
+[data-theme="dark"] .error-text {
+  color: var(--error-200);
+}
+
+[data-theme="light"] .error-text {
+  color: var(--error-700);
+}

@@ -26,12 +26,13 @@ import {
   Message,
   MessageData,
   PenpotColorData,
-  PluginData,
   UpdateLibraryColorData,
 } from "../model/message.ts";
+import { ToastData } from "../model/ToastData.ts";
 import { LibraryColor } from "@penpot/plugin-types";
+import { MessageService } from "./MessageService.ts";
 
-interface MaterialThemeService {
+interface ThemeBuilderService {
   /**
    * Generates a theme with a given name, source color and options.
    *
@@ -39,16 +40,12 @@ interface MaterialThemeService {
    * @param sourceColor Source color to use.
    * @param withTonalPalettes Whether to generate tonal palette colors.
    * @param withStateLayers Whether to generate state layer colors.
-   * @param onProgress Callback function that is called for each step.
-   * progress is the current progress, total is the total step count.
-   * @return Promise with the new plugin theme on success.
    */
   generateTheme(
     themeName: string,
     sourceColor: string,
     withTonalPalettes: boolean,
     withStateLayers: boolean,
-    onProgress: (progress: number, total: number) => void,
   ): Promise<PluginTheme>;
 
   /**
@@ -62,9 +59,6 @@ interface MaterialThemeService {
    * if not present.
    * @param withStateLayers Whether state layer colors should be generated if
    * not present.
-   * @param onProgress Callback function that is called for each step.
-   * progress is the current progress, total is the total step count.
-   * @return Promise with the updated plugin theme on success.
    */
   updateTheme(
     theme: PluginTheme,
@@ -72,7 +66,6 @@ interface MaterialThemeService {
     sourceColor: string | undefined,
     withTonalPalettes: boolean,
     withStateLayers: boolean,
-    onProgress: (progress: number, total: number) => void,
   ): Promise<PluginTheme>;
 
   /**
@@ -84,21 +77,23 @@ interface MaterialThemeService {
 }
 
 /**
- * The default implementation of MaterielThemeService that is based on window
- * messages.
+ * The default implementation of {@link ThemeBuilderService} that is based on
+ * window messages.
  *
  * Since penpot can be used only from plugin.ts, messages are sent received
  * from this service. The messages sent are consumed by penpot.ts, which
  * generates new messages for successful actions. This service then consumes
  * messages sent by penpot.ts for each action to update the state.
  */
-class MessageMaterialThemeService implements MaterialThemeService {
+class MessageThemeBuilderService
+  extends MessageService
+  implements ThemeBuilderService
+{
   async generateTheme(
     themeName: string,
     sourceColor: string,
     withTonalPalettes = false,
     withStateLayers = true,
-    onProgress: (progress: number, total: number) => void,
   ): Promise<PluginTheme> {
     // Create a reference for identifying any color created event
     const ref = Math.random();
@@ -110,6 +105,12 @@ class MessageMaterialThemeService implements MaterialThemeService {
     let count = 0;
     const theme: Theme = themeFromSourceColor(argbFromHex(sourceColor));
     const colors: LibraryColor[] = [];
+
+    this.onUpdate({
+      type: "progress-started",
+      message: "Generating theme...",
+      ref,
+    } as ToastData);
 
     return await new Promise(
       (
@@ -129,9 +130,21 @@ class MessageMaterialThemeService implements MaterialThemeService {
           if (data.ref != ref) return;
 
           colors.push(data.color);
-          onProgress(++count, expectedColorCount);
+          this.onUpdate({
+            type: "progress-updated",
+            message: "Generating theme assets...",
+            loaded: ++count,
+            total: expectedColorCount,
+            ref,
+          } as ToastData);
 
           if (colors.length == expectedColorCount) {
+            this.onUpdate({
+              type: "progress-updated",
+              message: "Finalizing theme generation...",
+              ref,
+            } as ToastData);
+
             const pluginTheme = mapColorsToThemes(colors);
             if (pluginTheme.length != 1) {
               reject(
@@ -139,10 +152,16 @@ class MessageMaterialThemeService implements MaterialThemeService {
                   `Expected exactly one theme to be generated, but got ${pluginTheme.length.toString()}`,
                 ),
               );
-            } else {
-              window.removeEventListener("message", listener);
-              resolve(pluginTheme[0]);
             }
+
+            this.onUpdate({
+              type: "progress-completed",
+              message: "Theme generated.",
+              ref,
+            } as ToastData);
+
+            window.removeEventListener("message", listener);
+            resolve(pluginTheme[0]);
           }
         };
 
@@ -181,11 +200,16 @@ class MessageMaterialThemeService implements MaterialThemeService {
     sourceColor: string | undefined,
     withTonalPalettes: boolean,
     withStateLayers: boolean,
-    onProgress: (progress: number, total: number) => void,
   ): Promise<PluginTheme> {
     // Create a reference for identifying any operation-related event
     const ref = Math.random();
     let count = 0;
+
+    this.onUpdate({
+      type: "progress-started",
+      message: "Preparing theme update...",
+      ref,
+    } as ToastData);
 
     // Generate a theme if there is a new source color
     const theme = sourceColor
@@ -198,7 +222,7 @@ class MessageMaterialThemeService implements MaterialThemeService {
 
     colors.forEach((color) => {
       // Generate updates for all colors in the current pluginTheme
-      updates.push(this.createColorUpdate(color, theme, themeName, ref));
+      updates.push(this.createColorUpdate(color, ref, theme, themeName));
     });
 
     const shouldGenerateStateLayers =
@@ -235,9 +259,21 @@ class MessageMaterialThemeService implements MaterialThemeService {
           if (data.ref != ref) return;
 
           updatedColors.push(data.color);
-          onProgress(++count, expectedColorCount);
+          this.onUpdate({
+            type: "progress-updated",
+            message: "Updating theme assets...",
+            loaded: ++count,
+            total: expectedColorCount,
+            ref,
+          } as ToastData);
 
           if (updatedColors.length == expectedColorCount) {
+            this.onUpdate({
+              type: "progress-updated",
+              message: "Finalizing theme update...",
+              ref,
+            } as ToastData);
+
             const pluginTheme = mapColorsToThemes(updatedColors);
             if (pluginTheme.length != 1) {
               reject(
@@ -245,10 +281,16 @@ class MessageMaterialThemeService implements MaterialThemeService {
                   `Expected exactly one theme to be generated, but got ${pluginTheme.length.toString()}`,
                 ),
               );
-            } else {
-              window.removeEventListener("message", listener);
-              resolve(pluginTheme[0]);
             }
+
+            this.onUpdate({
+              type: "progress-completed",
+              message: "Theme updated.",
+              ref,
+            } as ToastData);
+
+            window.removeEventListener("message", listener);
+            resolve(pluginTheme[0]);
           }
         };
 
@@ -304,9 +346,9 @@ class MessageMaterialThemeService implements MaterialThemeService {
 
   private createColorUpdate(
     color: LibraryColor,
-    theme: Theme | undefined,
-    themeName: string | undefined,
     ref: number,
+    theme?: Theme,
+    themeName?: string,
   ): Partial<UpdateLibraryColorData> {
     const segments = color.path.split(" / ");
     const update: Partial<UpdateLibraryColorData> = { color, ref };
@@ -426,24 +468,7 @@ class MessageMaterialThemeService implements MaterialThemeService {
       ref,
     } as CreateLocalLibraryColorData);
   }
-
-  /**
-   * Sends a well-defined message to plugin.ts
-   *
-   * @param type The message type
-   * @param data Data to send
-   */
-  private sendMessage(type: string, data: object | undefined = undefined) {
-    parent.postMessage(
-      {
-        source: "plugin",
-        type,
-        data,
-      } as Message<PluginData>,
-      "*",
-    );
-  }
 }
 
-export { MessageMaterialThemeService };
-export type { MaterialThemeService };
+export { MessageThemeBuilderService };
+export type { ThemeBuilderService };

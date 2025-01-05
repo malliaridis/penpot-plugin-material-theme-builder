@@ -1,4 +1,4 @@
-import { LibraryColor } from "@penpot/plugin-types";
+import { LibraryColor, Shape } from "@penpot/plugin-types";
 
 /**
  * The source of the messages.
@@ -22,11 +22,17 @@ interface Message<T> {
   data: T;
 }
 
-type PenpotData = PenpotThemeData | PenpotColorsData | PenpotColorData;
+type PenpotData =
+  | PenpotThemeData
+  | PenpotMappingData
+  | PenpotColorsData
+  | PenpotShapesData
+  | PenpotColorData;
 
 type PluginData =
   | CreateLocalLibraryColorData
   | UpdateLibraryColorData
+  | SwapColorsData
   | DeleteLocalLibraryThemeData;
 
 interface CreateLocalLibraryColorData {
@@ -44,14 +50,33 @@ interface UpdateLibraryColorData {
   /**
    * New path of the color to set
    */
-  path: string;
+  path?: string;
   /**
    * New color value to use
    */
-  value: string;
+  value?: string;
   /**
    * Reference number for traceability.
    */
+  ref: number;
+}
+
+/**
+ * Color map that links a string / ID with a {@link LibraryColor}.
+ * Depending on the use case, a key may or may not be the ID of the same color
+ * as the value's color ID.
+ */
+type ColorMap = Record<string, LibraryColor | undefined>;
+
+/**
+ * Data object that holds color mappings for swapping colors.
+ */
+interface SwapColorsData {
+  /**
+   * Color mappings that links the ID of a {@link LibraryColor} that should be
+   * replaced with its value {@link LibraryColor}.
+   */
+  mappings: ColorMap;
   ref: number;
 }
 
@@ -64,8 +89,34 @@ interface PenpotThemeData {
   theme: string;
 }
 
+/**
+ * Mapping data sent by penpot when mapping assets. Currently not used.
+ */
+interface PenpotMappingData {
+  /**
+   * The ID of the shape that was checked.
+   */
+  id?: string;
+  /**
+   * The mappings that are to be processed, if starting the mapping.
+   */
+  size?: number;
+  /**
+   * Whether the shape with the ID was updated.
+   */
+  updated: boolean;
+  /**
+   * Reference number.
+   */
+  ref: number;
+}
+
 interface PenpotColorsData {
   colors: LibraryColor[];
+}
+
+interface PenpotShapesData {
+  shapes: Shape[];
 }
 
 interface PenpotColorData {
@@ -80,9 +131,13 @@ export type {
   PenpotData,
   PluginData,
   PenpotThemeData,
+  PenpotMappingData,
   PenpotColorsData,
+  PenpotShapesData,
   PenpotColorData,
   CreateLocalLibraryColorData,
   UpdateLibraryColorData,
+  SwapColorsData,
   DeleteLocalLibraryThemeData,
+  ColorMap,
 };

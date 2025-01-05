@@ -1,0 +1,33 @@
+.tab-item[aria-selected="true"][data-appearance="primary"]:is(button) {
+  color: var(--accent-primary);
+  background-color: var(--background-tertiary);
+  border: 2px solid transparent;
+
+  &:hover {
+    color: var(--accent-primary);
+    background-color: var(--background-quaternary);
+    border: 2px solid transparent;
+  }
+
+  &:focus {
+    color: var(--accent-primary);
+    background-color: var(--background-quaternary);
+    border: 2px solid transparent;
+  }
+}
+
+.tab-item[data-appearance="secondary"]:is(button) {
+  color: var(--foreground-secondary);
+  background-color: var(--background-secondary);
+  border: 2px solid transparent;
+
+  &:hover {
+    color: var(--foreground-primary) !important;
+    background-color: var(--background-secondary) !important;
+    border: 2px solid transparent !important;
+  }
+
+  &:focus {
+    color: var(--foreground-primary) !important;
+  }
+}

@@ -1,4 +1,4 @@
-import { LibraryColor } from "@penpot/plugin-types";
+import { Fill, LibraryColor } from "@penpot/plugin-types";
 import {
   JsonScheme,
   Palettes,
@@ -206,6 +206,62 @@ function getExpectedColorsCount(
   return expectedColorCount;
 }
 
+/**
+ * Sorts colors alphabetically.
+ *
+ * @param colors Color array to sort.
+ * @return The {@link colors} array sorted alphabetically.
+ */
+function sortedColors(colors: LibraryColor[]): LibraryColor[] {
+  return colors.sort(colorCompare);
+}
+
+/**
+ * Color compare function that can be used to sort colors alphabetically.
+ *
+ * @param color1 First color.
+ * @param color2 Second color.
+ */
+function colorCompare(color1: LibraryColor, color2: LibraryColor): number {
+  return (color1.path + color1.name).localeCompare(color2.path + color2.name);
+}
+
+/**
+ * Determines whether a value is a {@link Fill} array.
+ *
+ * @param value the value to check
+ * @return `true` iff the value is a Fill array
+ */
+function isFillArray(value: Fill[] | "mixed"): value is Fill[] {
+  return Array.isArray(value);
+}
+
+/**
+ * Determines whether all assets from one theme are present in another theme.
+ *
+ * @param theme1 Theme of from which to get the assets that should be looked up
+ * @param theme2 Theme in which the assets should exist
+ * @return `true` iff the assets from {@link theme1} exist in {@link theme2}.
+ */
+function doThemesMatch(theme1?: PluginTheme, theme2?: PluginTheme): boolean {
+  if (!theme1 && !theme2) return true;
+  if (!theme1 || !theme2) return false;
+
+  const theme1Colors = flattenColors(theme1, false);
+  const theme2Colors = flattenColors(theme2, false);
+  if (theme1Colors.length > theme2Colors.length) return false;
+
+  return theme1Colors.every((theme1Color) => {
+    return theme2Colors.some((theme2Color) => {
+      return (
+        theme1Color.name == theme2Color.name &&
+        theme1Color.path.substring(theme1.name.length) ==
+          theme2Color.path.substring(theme2.name.length)
+      );
+    });
+  }, {});
+}
+
 export {
   getValidSourceColor,
   argbWithOpacity,
@@ -213,4 +269,8 @@ export {
   flattenColors,
   getColorForPathSegments,
   getExpectedColorsCount,
+  sortedColors,
+  colorCompare,
+  isFillArray,
+  doThemesMatch,
 };

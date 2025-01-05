@@ -1,0 +1,12 @@
+.tab-container {
+  width: 100%;
+  background-color: var(--background-secondary);
+  display: flex;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  border-radius: var(--spacing-12);
+}
+
+.tab-container > * {
+  flex: 1;
+}
