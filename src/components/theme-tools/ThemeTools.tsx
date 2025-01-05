@@ -1,6 +1,6 @@
 import "./ThemeTools.css";
 import { ToolSelector } from "../tool-selector/ToolSelector.tsx";
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import { Tool } from "../../model/Tool.ts";
 import { ConfigureThemeForm } from "./ConfigureThemeForm.tsx";
 import { SwapValuesForm } from "./SwapValuesForm.tsx";
@@ -8,27 +8,29 @@ import { SwapValuesForm } from "./SwapValuesForm.tsx";
 const ThemeTools: React.FC = () => {
   const [currentTool, setCurrentTool] = useState<Tool>("swap-variant");
 
-  const form = getToolForm(currentTool);
-
   return (
     <div className="content">
-      <p className="body-m">
-        Tools that allow you to make bulk changes in your files and assets.
-      </p>
       <div className="column-16">
-        <ToolSelector
-          currentTool={currentTool}
-          onToolChanged={setCurrentTool}
-          disabled={false}
-        />
-        {form}
+        <div>
+          <ToolSelector
+            currentTool={currentTool}
+            onToolChanged={setCurrentTool}
+            disabled={false}
+          />
+        </div>
+        <ToolInfo tool={currentTool} />
+        <ToolForm tool={currentTool} />
       </div>
     </div>
   );
 };
 
-function getToolForm(currentTool: Tool) {
-  switch (currentTool) {
+interface ToolProps {
+  tool: Tool;
+}
+
+const ToolForm: FC<ToolProps> = ({ tool }) => {
+  switch (tool) {
     case "swap-variant": {
       return <ConfigureThemeForm />;
     }
@@ -39,5 +41,35 @@ function getToolForm(currentTool: Tool) {
       return <div>Placeholder</div>;
     }
   }
-}
+};
+
+const ToolInfo: FC<ToolProps> = ({ tool }) => {
+  switch (tool) {
+    case "swap-variant": {
+      return (
+        <p className="body-s no-margin">
+          Tool that swaps the color values of a page or selection with colors of
+          the same theme.
+        </p>
+      );
+    }
+    case "change-theme": {
+      return (
+        <p className="body-s no-margin">
+          Tool that swaps the color values of a page or selection with color
+          values of another theme.
+        </p>
+      );
+    }
+    case "replace-theme": {
+      return (
+        <p className="body-s no-margin">
+          Tool that updates the color values of a local theme with the values of
+          another theme.
+        </p>
+      );
+    }
+  }
+};
+
 export { ThemeTools };
