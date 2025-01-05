@@ -1,27 +1,56 @@
-.toast-loader {
-  position: absolute;
-  bottom: 0;
-  background-color: var(--background-primary);
-  width: 100%;
+.Toastify {
+  --toastify-color-light: var(--background-primary);
+  --toastify-color-dark: var(--background-primary);
+  --toastify-color-info: var(--info-500);
+  --toastify-color-success: var(--success-500);
+  --toastify-color-warning: var(--warning-500);
+  --toastify-color-error: var(--error-500);
+  --toastify-color-transparent: rgba(255, 255, 255, 0.7);
+
+  /*--toastify-icon-color-info: var(--toastify-color-info);*/
+  /*--toastify-icon-color-success: var(--toastify-color-success);*/
+  /*--toastify-icon-color-warning: var(--toastify-color-warning);*/
+  /*--toastify-icon-color-error: var(--toastify-color-error);*/
+
+  /*--toastify-container-width: fit-content;*/
+  --toastify-toast-width: 100%;
+  --toastify-toast-offset: var(--spacing-8);
+  --toastify-toast-background: var(--background-primary);
+  --toastify-toast-padding: var(--spacing-8);
+  --toastify-toast-min-height: var(--spacing-40);
+  /*--toastify-toast-max-height: 800px;*/
+  --toastify-toast-bd-radius: var(--spacing-8);
+  /*--toastify-toast-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);*/
+  --toastify-font-family: Work Sans, sans-serif;
+  --toastify-z-index: 9999;
+  --toastify-text-color-light: var(--foreground-primary);
+  --toastify-text-color-dark: var(--foreground-primary);
+
+  /* Used only for colored theme */
+  /*--toastify-text-color-info: #fff;*/
+  /*--toastify-text-color-success: #fff;*/
+  /*--toastify-text-color-warning: #fff;*/
+  /*--toastify-text-color-error: #fff;*/
+
+  --toastify-spinner-color: var(--accent-primary);
+  /*--toastify-spinner-color-empty-area: #e0e0e0;*/
+  --toastify-color-progress-light: var(--accent-primary);
+  --toastify-color-progress-dark: var(--accent-primary);
+  --toastify-color-progress-info: var(--info-500);
+  --toastify-color-progress-success: var(--success-500);
+  --toastify-color-progress-warning: var(--warning-500);
+  --toastify-color-progress-error: var(--error-500);
+  /* used to control the opacity of the progress trail */
+  /*--toastify-color-progress-bgo: 0.2;*/
+}
+
+.Toastify__toast {
   border: 1px var(--background-quaternary) solid;
   border-radius: var(--spacing-8);
 }
 
-.toast-loader-content {
-  padding: var(--spacing-8);
+.toast-content {
   width: 100%;
   display: flex;
   gap: var(--spacing-8);
-}
-
-.toast-progress-bar {
-  bottom: 0;
-  width: 100%;
-  height: var(--spacing-4);
-  background-color: var(--background-quaternary);
-}
-
-.toast-progress-bar-indicator {
-  height: var(--spacing-4);
-  background-color: var(--accent-primary);
 }
