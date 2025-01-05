@@ -64,6 +64,7 @@ penpot.ui.onMessage<Message<MessageData>>((message) => {
   }
 });
 
+// Update the selection in the penpot context
 penpot.on("selectionchange", () => {
   const shapes = penpot.selection;
   penpot.ui.sendMessage({
@@ -73,6 +74,15 @@ penpot.on("selectionchange", () => {
       shapes: shapes,
     },
   } as Message<PenpotShapesData>);
+});
+
+// Update the theme in the iframe
+penpot.on("themechange", (theme) => {
+  penpot.ui.sendMessage({
+    source: "penpot",
+    type: "theme-changed",
+    data: { theme },
+  });
 });
 
 function createLocalLibraryColor(
