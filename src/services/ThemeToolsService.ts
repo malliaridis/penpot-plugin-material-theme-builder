@@ -22,6 +22,12 @@ interface ThemeToolsService {
     theme: PluginTheme,
     useDarkTheme: boolean,
   ): Promise<void>;
+
+  replaceThemes(
+    forSelection: boolean,
+    toReplace: PluginTheme,
+    replaceWith: PluginTheme,
+  ): Promise<void>;
 }
 
 /**
@@ -46,6 +52,31 @@ class MessageThemeToolsService
 
     if (!mappings)
       return Promise.reject(new Error("Could not generate color mappings."));
+
+    const updateKey = forSelection
+      ? "update-current-selection-colors"
+      : "update-current-page-colors";
+
+    // TODO Display notification
+
+    // TODO Update notification during progress
+
+    // TODO Hide notification on completion
+
+    this.sendMessage(updateKey, {
+      mappings,
+    } as SwapColorsData);
+
+    // TODO remove below promise once notification bar implemented
+    return Promise.resolve();
+  }
+
+  replaceThemes(
+    forSelection: boolean,
+    toReplace: PluginTheme,
+    replaceWith: PluginTheme,
+  ): Promise<void> {
+    const mappings = this.createThemeMappingsWith(toReplace, replaceWith);
 
     const updateKey = forSelection
       ? "update-current-selection-colors"
@@ -97,6 +128,26 @@ class MessageThemeToolsService
 
     return keyColors.reduce<ColorMap>((record, color1, index) => {
       record[color1.id] = valueColors[index];
+      return record;
+    }, {});
+  }
+
+  private createThemeMappingsWith(
+    replace: PluginTheme,
+    replaceWith: PluginTheme,
+  ): ColorMap {
+    const replaceColors = flattenColors(replace, false);
+    const withColors = flattenColors(replaceWith, false);
+
+    return replaceColors.reduce<ColorMap>((record, color) => {
+      record[color.id] =
+        withColors.find((withColor) => {
+          return (
+            color.name == withColor.name &&
+            color.path.substring(replace.name.length) ==
+              withColor.path.substring(replaceWith.name.length)
+          );
+        }) ?? color;
       return record;
     }, {});
   }

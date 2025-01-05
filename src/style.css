@@ -42,3 +42,11 @@ p {
   border: 1px solid var(--foreground-secondary);
   cursor: not-allowed;
 }
+
+[data-theme=dark] .error-text {
+  color: var(--error-200);
+}
+
+[data-theme=light] .error-text {
+  color: var(--error-700);
+}

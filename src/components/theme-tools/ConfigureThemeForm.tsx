@@ -33,10 +33,12 @@ const ConfigureThemeForm: FC = () => {
   return (
     <div className="column-16">
       <ThemeSelector
+        label="Theme"
         themes={penpotContext.allThemes}
         disabled={isLoading}
         currentTheme={currentTheme}
         allowNewTheme={false}
+        useColorAsIcon={true}
         onThemeChanged={onThemeChanged}
       />
       <div className="form-group">

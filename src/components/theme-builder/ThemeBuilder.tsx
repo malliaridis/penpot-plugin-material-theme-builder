@@ -133,10 +133,12 @@ const ThemeBuilder: React.FC = () => {
       </p>
       <div className="column-16">
         <ThemeSelector
+          label="Theme"
           themes={penpotContext.themes}
           disabled={isLoading}
           currentTheme={currentTheme}
           allowNewTheme={true}
+          useColorAsIcon={false}
           onThemeChanged={onThemeChanged}
         />
         <div className="form-group">

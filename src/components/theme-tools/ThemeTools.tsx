@@ -4,6 +4,7 @@ import React, { FC, useState } from "react";
 import { Tool } from "../../model/Tool.ts";
 import { ConfigureThemeForm } from "./ConfigureThemeForm.tsx";
 import { SwapValuesForm } from "./SwapValuesForm.tsx";
+import { ChangeThemeForm } from "./ChangeThemeForm.tsx";
 
 const ThemeTools: React.FC = () => {
   const [currentTool, setCurrentTool] = useState<Tool>("swap-variant");
@@ -35,10 +36,10 @@ const ToolForm: FC<ToolProps> = ({ tool }) => {
       return <ConfigureThemeForm />;
     }
     case "change-theme": {
-      return <SwapValuesForm />;
+      return <ChangeThemeForm />;
     }
     case "replace-theme": {
-      return <div>Placeholder</div>;
+      return <SwapValuesForm />;
     }
   }
 };

@@ -10,3 +10,9 @@
   padding: 2px;
   color: var(--foreground-secondary);
 }
+
+.color-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--spacing-4);
+}

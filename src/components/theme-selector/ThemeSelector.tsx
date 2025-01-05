@@ -5,6 +5,10 @@ import { Selector } from "../selector/Selector.tsx";
 
 interface ThemeSelectorProps {
   /**
+   * Label to use for the form field.
+   */
+  label: string | undefined;
+  /**
    * Theme names / identifiers to use in the selection.
    */
   themes: (PluginTheme | undefined)[];
@@ -13,6 +17,11 @@ interface ThemeSelectorProps {
    * Whether an undefined option should be displayed for creating a new theme.
    */
   allowNewTheme: boolean;
+
+  /**
+   * Whether to use the theme's source color as icon, or an edit / add icon.
+   */
+  useColorAsIcon: boolean;
 
   /**
    * The pre-selected theme.
@@ -35,28 +44,36 @@ interface ThemeSelectorProps {
 }
 
 const ThemeSelector: React.FC<ThemeSelectorProps> = ({
+  label,
   themes,
   allowNewTheme,
+  useColorAsIcon,
   currentTheme,
   onThemeChanged,
   disabled,
 }: ThemeSelectorProps) => {
   const themeOptions: (PluginTheme | undefined)[] = [...themes];
   if (allowNewTheme) themeOptions.unshift(undefined);
+  const placeholder = allowNewTheme ? "Create New Theme" : "Select Theme";
 
   return (
     <Selector
-      label="Theme"
+      label={label}
       items={themeOptions}
       currentItem={currentTheme}
       onItemChanged={onThemeChanged}
-      itemToString={(theme) => theme?.name ?? "Create New Theme"}
+      itemToString={(theme) => theme?.name ?? placeholder}
       itemToIcon={(theme) =>
-        theme ? (
+        theme && useColorAsIcon ? (
+          <div
+            className="color-icon"
+            style={{ backgroundColor: theme.source.color }}
+          />
+        ) : theme ? (
           <Edit className="option-icon-small" />
-        ) : (
+        ) : allowNewTheme ? (
           <Plus className="option-icon" />
-        )
+        ) : undefined
       }
       disabled={disabled}
     />

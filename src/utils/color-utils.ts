@@ -236,6 +236,32 @@ function isFillArray(value: Fill[] | "mixed"): value is Fill[] {
   return Array.isArray(value);
 }
 
+/**
+ * Determines whether all assets from one theme are present in another theme.
+ *
+ * @param theme1 Theme of from which to get the assets that should be looked up
+ * @param theme2 Theme in which the assets should exist
+ * @return `true` iff the assets from {@link theme1} exist in {@link theme2}.
+ */
+function doThemesMatch(theme1?: PluginTheme, theme2?: PluginTheme): boolean {
+  if (!theme1 && !theme2) return true;
+  if (!theme1 || !theme2) return false;
+
+  const theme1Colors = flattenColors(theme1, false);
+  const theme2Colors = flattenColors(theme2, false);
+  if (theme1Colors.length > theme2Colors.length) return false;
+
+  return theme1Colors.every((theme1Color) => {
+    return theme2Colors.some((theme2Color) => {
+      return (
+        theme1Color.name == theme2Color.name &&
+        theme1Color.path.substring(theme1.name.length) ==
+          theme2Color.path.substring(theme2.name.length)
+      );
+    });
+  }, {});
+}
+
 export {
   getValidSourceColor,
   argbWithOpacity,
@@ -246,4 +272,5 @@ export {
   sortedColors,
   colorCompare,
   isFillArray,
+  doThemesMatch,
 };
