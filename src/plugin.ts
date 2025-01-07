@@ -1,5 +1,6 @@
 import {
   ColorMap,
+  ColorsData,
   CreateLocalLibraryColorData,
   DeleteLocalLibraryThemeData,
   Message,
@@ -31,11 +32,26 @@ penpot.ui.onMessage<Message<MessageData>>((message) => {
   }
 
   switch (message.type) {
+    case "create-colors": {
+      const { colors, ref } = message.data as ColorsData;
+      createColors(colors, ref);
+      break;
+    }
+    case "update-colors": {
+      const { colors, ref } = message.data as ColorsData;
+      updateColors(colors, ref);
+      break;
+    }
+    case "remove-colors": {
+      const { colors, ref } = message.data as ColorsData;
+      removeColors(colors, ref);
+      break;
+    }
     case "create-local-library-color": {
       const { color, group, name, ref } =
         message.data as CreateLocalLibraryColorData;
       const newColor = createLocalLibraryColor(color, group, name);
-      sendColorCreatedMessage(newColor, ref);
+      sendLibraryColorCreatedMessage(newColor, ref);
       break;
     }
     case "load-local-library-colors": {
@@ -98,6 +114,63 @@ function createLocalLibraryColor(
   return colorRef;
 }
 
+function createColors(colors: LibraryColor[], ref: number) {
+  colors.forEach((color) => {
+    const colorRef = penpot.library.local.createColor();
+
+    applyValues(colorRef, color);
+
+    penpot.ui.sendMessage({
+      source: "penpot",
+      type: "color-created",
+      data: { color, ref } as PenpotColorData,
+    } as Message<PenpotData>);
+  });
+}
+
+function updateColors(colors: LibraryColor[], ref: number) {
+  colors.forEach((color) => {
+    const colorRef = penpot.library.local.colors.find((localColor) => {
+      return localColor.id === color.id;
+    });
+    if (!colorRef) {
+      console.warn(`Color with ID ${color.id} not found.`);
+      return;
+    }
+
+    applyValues(colorRef, color);
+
+    penpot.ui.sendMessage({
+      source: "penpot",
+      type: "color-updated",
+      data: { color, ref } as PenpotColorData,
+    } as Message<PenpotData>);
+  });
+}
+
+function applyValues(color: LibraryColor, apply: LibraryColor) {
+  if (apply.color) color.color = apply.color;
+  if (apply.opacity) color.opacity = apply.opacity;
+  if (apply.gradient) color.gradient = apply.gradient;
+  if (apply.image) color.image = apply.image;
+  // Always set the path at the end,
+  // as it is resetting the path after setting the color
+  if (apply.path) color.path = apply.path;
+}
+
+function removeColors(colors: LibraryColor[], ref: number) {
+  console.warn("Penpot API does not support removals. Skipping...");
+
+  colors.forEach((color) => {
+    // TODO Implement removal once supported.
+    penpot.ui.sendMessage({
+      source: "penpot",
+      type: "color-removed",
+      data: { color, ref } as PenpotColorData,
+    } as Message<PenpotData>);
+  });
+}
+
 function loadLocalLibraryColors() {
   penpot.ui.sendMessage({
     source: "penpot",
@@ -127,7 +200,7 @@ function deleteLocalLibraryColors(themeName: string, ref: number) {
   console.warn("Operation not supported by penpot plugin.");
 }
 
-function sendColorCreatedMessage(color: LibraryColor, ref: number) {
+function sendLibraryColorCreatedMessage(color: LibraryColor, ref: number) {
   penpot.ui.sendMessage({
     source: "penpot",
     type: "library-color-created",
@@ -143,11 +216,16 @@ function updateLibraryColor(update: UpdateLibraryColorData) {
   );
   if (!penpotColor) return;
 
+  // Workaround: always set the path at the end,
+  // as it is reset after setting the color
+  const finalPath = path ? path : penpotColor.path;
+
   if (value) {
     penpotColor.color = value;
   }
-  if (path) {
-    penpotColor.path = path;
+
+  if (finalPath) {
+    penpotColor.path = finalPath;
   }
 
   penpot.ui.sendMessage({

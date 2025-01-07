@@ -11,7 +11,7 @@ type MessageSource = "penpot" | "plugin";
  * The message data that can be either a penpot message or a plugin message,
  * depending on the source.
  */
-type MessageData = PenpotData | PluginData;
+type MessageData = PenpotData | PluginData | ColorsData;
 
 /**
  * Message with predefined types.
@@ -115,6 +115,11 @@ interface PenpotColorsData {
   colors: LibraryColor[];
 }
 
+interface ColorsData {
+  colors: LibraryColor[];
+  ref: number;
+}
+
 interface PenpotShapesData {
   shapes: Shape[];
 }
@@ -140,4 +145,5 @@ export type {
   SwapColorsData,
   DeleteLocalLibraryThemeData,
   ColorMap,
+  ColorsData,
 };
