@@ -48,9 +48,9 @@ penpot.ui.onMessage<Message<MessageData>>((message) => {
       break;
     }
     case "create-local-library-color": {
-      const { color, group, name, ref } =
+      const { color, opacity, group, name, ref } =
         message.data as CreateLocalLibraryColorData;
-      const newColor = createLocalLibraryColor(color, group, name);
+      const newColor = createLocalLibraryColor(color, opacity, group, name);
       sendLibraryColorCreatedMessage(newColor, ref);
       break;
     }
@@ -104,11 +104,13 @@ penpot.on("themechange", (theme) => {
 
 function createLocalLibraryColor(
   color: string,
+  opacity: number,
   group: string,
   name: string,
 ): LibraryColor {
   const colorRef = penpot.library.local.createColor();
   colorRef.color = color;
+  colorRef.opacity = opacity;
   colorRef.path = group;
   colorRef.name = name;
   return colorRef;

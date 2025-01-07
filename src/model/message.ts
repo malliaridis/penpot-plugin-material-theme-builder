@@ -37,6 +37,7 @@ type PluginData =
 
 interface CreateLocalLibraryColorData {
   color: string;
+  opacity: number;
   group: string;
   name: string;
   ref: number;

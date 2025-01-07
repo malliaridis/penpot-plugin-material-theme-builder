@@ -171,6 +171,7 @@ class MessageThemeBuilderService
         const argbColor = theme.source;
         this.createLocalLibraryColor(
           hexFromArgb(argbColor),
+          1,
           themeName,
           "source",
           ref,
@@ -400,6 +401,7 @@ class MessageThemeBuilderService
       const argbColor = jsonScheme[colorName];
       this.createLocalLibraryColor(
         hexFromArgb(argbColor),
+        1,
         `${themeName}/scheme/${name}`,
         colorName,
         ref,
@@ -419,6 +421,7 @@ class MessageThemeBuilderService
         const color = hexFromArgb(argbWithOpacity(argbColor, opacity));
         this.createLocalLibraryColor(
           color,
+          opacity,
           `${themeName}/state-layers/${name}/${colorName}`,
           `opacity-${opacity.toFixed(2).toString()}`,
           ref,
@@ -448,6 +451,7 @@ class MessageThemeBuilderService
       const argbColor = palette.tone(tone);
       this.createLocalLibraryColor(
         hexFromArgb(argbColor),
+        1,
         `${themeName}/palettes`,
         `${name}-${tone.toString()}`,
         ref,
@@ -457,12 +461,14 @@ class MessageThemeBuilderService
 
   private createLocalLibraryColor(
     color: string,
+    opacity: number,
     group: string,
     name: string,
     ref: number,
   ) {
     this.sendMessage("create-local-library-color", {
       color,
+      opacity,
       group,
       name,
       ref,
