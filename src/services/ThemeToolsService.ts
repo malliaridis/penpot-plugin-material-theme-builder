@@ -9,7 +9,11 @@ import {
   SwapColorsData,
 } from "../model/message.ts";
 import { PluginTheme } from "../model/material.ts";
-import { colorCompare, flattenColors } from "../utils/color-utils.ts";
+import {
+  colorCompare,
+  flattenColors,
+  sameColorReference,
+} from "../utils/color-utils.ts";
 import { ToastData } from "../model/ToastData.ts";
 import { LibraryColor } from "@penpot/plugin-types";
 
@@ -376,11 +380,7 @@ class MessageThemeToolsService
     return replaceColors.reduce<ColorMap>((record, color) => {
       record[color.id] =
         withColors.find((withColor) => {
-          return (
-            color.name == withColor.name &&
-            color.path.substring(replace.name.length) ==
-              withColor.path.substring(replaceWith.name.length)
-          );
+          return sameColorReference(withColor, color);
         }) ?? color;
       return record;
     }, {});
@@ -482,10 +482,11 @@ class MessageThemeToolsService
 
       let index = -1;
       const updateColor = updatingColors.find((localColor, localIndex) => {
-        index = localIndex;
-        const localSegments = localColor.path.split(" / ");
-        localSegments.shift();
-        return areArraysEqual(pathSegments, localSegments);
+        if (sameColorReference(localColor, color)) {
+          index = localIndex;
+          return true;
+        }
+        return false;
       });
 
       if (updateColor) {
@@ -520,13 +521,6 @@ class MessageThemeToolsService
 
     return { additions, updates, removals };
   }
-}
-
-function areArraysEqual(array1: string[], array2: string[]): boolean {
-  if (array1.length !== array2.length) {
-    return false;
-  }
-  return array1.every((value, index) => value === array2[index]);
 }
 
 export { MessageThemeToolsService };
