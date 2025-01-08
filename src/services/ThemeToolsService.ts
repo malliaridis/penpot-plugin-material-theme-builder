@@ -1,10 +1,9 @@
 import { MessageService } from "./MessageService.ts";
 import {
+  ColorData,
   ColorMap,
-  ColorsData,
   Message,
   MessageData,
-  PenpotColorData,
   PenpotMappingData,
   SwapColorsData,
 } from "../model/message.ts";
@@ -160,10 +159,38 @@ class MessageThemeToolsService
     );
 
     const totalChanges = additions.length + updates.length + removals.length;
+    let totalChangesCount = 0;
 
-    await this.createAssets(additions, totalChanges, ref);
-    await this.updateAssets(updates, totalChanges, ref);
-    await this.removeAssets(removals, totalChanges, ref);
+    await this.createAssets(additions, ref, (loaded, total) => {
+      this.onUpdate({
+        type: "progress-updated",
+        message: "Creating missing assets...",
+        loaded,
+        total,
+        progress: ++totalChangesCount / totalChanges,
+        ref,
+      } as ToastData);
+    });
+    await this.updateAssets(updates, ref, (loaded, total) => {
+      this.onUpdate({
+        type: "progress-updated",
+        message: "Updating existing assets...",
+        loaded,
+        total,
+        progress: ++totalChangesCount / totalChanges,
+        ref,
+      } as ToastData);
+    });
+    await this.removeAssets(removals, ref, (loaded, total) => {
+      this.onUpdate({
+        type: "progress-updated",
+        message: "Removing extra assets...",
+        loaded,
+        total,
+        progress: ++totalChangesCount / totalChanges,
+        ref,
+      } as ToastData);
+    });
 
     this.onUpdate({
       type: "progress-completed",
@@ -174,18 +201,12 @@ class MessageThemeToolsService
 
   private async createAssets(
     additions: LibraryColor[],
-    totalChanges: number,
     ref: number,
+    onProgress: (loaded: number, total: number) => void,
   ): Promise<void> {
     let additionsCount = 0;
 
-    this.onUpdate({
-      type: "progress-updated",
-      message: "Creating new assets...",
-      loaded: additionsCount,
-      total: totalChanges,
-      ref,
-    } as ToastData);
+    onProgress(additionsCount, additions.length);
 
     await new Promise((resolve: (value?: unknown) => void) => {
       if (additions.length == 0) resolve();
@@ -199,17 +220,11 @@ class MessageThemeToolsService
         }
 
         // Right now we are only mapping colors, so we receive color data
-        const data = event.data.data as PenpotColorData;
+        const data = event.data.data as ColorData;
 
         if (data.ref != ref) return;
 
-        this.onUpdate({
-          type: "progress-updated",
-          loaded: ++additionsCount,
-          total: totalChanges,
-          message: "Creating assets...",
-          ref,
-        } as ToastData);
+        onProgress(++additionsCount, additions.length);
 
         if (additionsCount == additions.length) {
           window.removeEventListener("message", listener);
@@ -219,27 +234,20 @@ class MessageThemeToolsService
 
       window.addEventListener("message", listener);
 
-      this.sendMessage("create-colors", {
-        colors: additions,
-        ref,
-      } as ColorsData);
+      additions.forEach((color) => {
+        this.sendMessage("create-color", { color, ref } as ColorData);
+      });
     });
   }
 
   private async updateAssets(
     updates: LibraryColor[],
-    totalChanges: number,
     ref: number,
+    onProgress: (loaded: number, total: number) => void,
   ) {
     let updateCount = 0;
 
-    this.onUpdate({
-      type: "progress-updated",
-      message: "Updating assets...",
-      loaded: updateCount,
-      total: totalChanges,
-      ref,
-    } as ToastData);
+    onProgress(updateCount, updates.length);
 
     await new Promise((resolve: (value?: unknown) => void) => {
       if (updates.length == 0) resolve();
@@ -253,17 +261,11 @@ class MessageThemeToolsService
         }
 
         // Right now we are only mapping colors, so we receive color data
-        const data = event.data.data as PenpotColorData;
+        const data = event.data.data as ColorData;
 
         if (data.ref != ref) return;
 
-        this.onUpdate({
-          type: "progress-updated",
-          loaded: ++updateCount,
-          total: totalChanges,
-          message: "Updating existing assets...",
-          ref,
-        } as ToastData);
+        onProgress(++updateCount, updates.length);
 
         if (updateCount == updates.length) {
           window.removeEventListener("message", listener);
@@ -273,27 +275,20 @@ class MessageThemeToolsService
 
       window.addEventListener("message", listener);
 
-      this.sendMessage("update-colors", {
-        colors: updates,
-        ref,
-      } as ColorsData);
+      updates.forEach((update) => {
+        this.sendMessage("update-color", { color: update, ref } as ColorData);
+      });
     });
   }
 
   private async removeAssets(
     removals: LibraryColor[],
-    totalChanges: number,
     ref: number,
+    onProgress: (loaded: number, total: number) => void,
   ) {
     let removeCount = 0;
 
-    this.onUpdate({
-      type: "progress-updated",
-      message: "Removing assets...",
-      loaded: removeCount,
-      total: totalChanges,
-      ref,
-    } as ToastData);
+    onProgress(removeCount, removals.length);
 
     await new Promise((resolve: (value?: unknown) => void) => {
       if (removals.length == 0) resolve();
@@ -307,17 +302,11 @@ class MessageThemeToolsService
         }
 
         // Right now we are only mapping colors, so we receive color data
-        const data = event.data.data as PenpotColorData;
+        const data = event.data.data as ColorData;
 
         if (data.ref != ref) return;
 
-        this.onUpdate({
-          type: "progress-updated",
-          loaded: ++removeCount,
-          total: totalChanges,
-          message: "Removing assets...",
-          ref,
-        } as ToastData);
+        onProgress(++removeCount, removals.length);
 
         if (removeCount == removals.length) {
           window.removeEventListener("message", listener);
@@ -327,10 +316,9 @@ class MessageThemeToolsService
 
       window.addEventListener("message", listener);
 
-      this.sendMessage("remove-colors", {
-        colors: removals,
-        ref,
-      } as ColorsData);
+      removals.forEach((removal) => {
+        this.sendMessage("remove-color", { color: removal, ref } as ColorData);
+      });
     });
   }
 
@@ -515,6 +503,7 @@ class MessageThemeToolsService
         const pathSegments = color.path.split(" / ");
         pathSegments[0] = theme.name;
         newColor.path = pathSegments.join(" / ");
+        newColor.name = color.name;
         return newColor;
       });
     }

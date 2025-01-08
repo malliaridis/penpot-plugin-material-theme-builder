@@ -11,7 +11,7 @@ type MessageSource = "penpot" | "plugin";
  * The message data that can be either a penpot message or a plugin message,
  * depending on the source.
  */
-type MessageData = PenpotData | PluginData | ColorsData;
+type MessageData = PenpotData | PluginData | PenpotColorsData | ColorData;
 
 /**
  * Message with predefined types.
@@ -23,44 +23,12 @@ interface Message<T> {
 }
 
 type PenpotData =
-  | PenpotThemeData
+  | ThemeData
   | PenpotMappingData
   | PenpotColorsData
-  | PenpotShapesData
-  | PenpotColorData;
+  | PenpotShapesData;
 
-type PluginData =
-  | CreateLocalLibraryColorData
-  | UpdateLibraryColorData
-  | SwapColorsData
-  | DeleteLocalLibraryThemeData;
-
-interface CreateLocalLibraryColorData {
-  color: string;
-  opacity: number;
-  group: string;
-  name: string;
-  ref: number;
-}
-
-interface UpdateLibraryColorData {
-  /**
-   * Library color to update
-   */
-  color: LibraryColor;
-  /**
-   * New path of the color to set
-   */
-  path?: string;
-  /**
-   * New color value to use
-   */
-  value?: string;
-  /**
-   * Reference number for traceability.
-   */
-  ref: number;
-}
+type PluginData = SwapColorsData | DeleteLocalLibraryThemeData;
 
 /**
  * Color map that links a string / ID with a {@link LibraryColor}.
@@ -86,8 +54,9 @@ interface DeleteLocalLibraryThemeData {
   ref: number;
 }
 
-interface PenpotThemeData {
+interface ThemeData {
   theme: string;
+  ref: number;
 }
 
 /**
@@ -112,22 +81,30 @@ interface PenpotMappingData {
   ref: number;
 }
 
+/**
+ * Message data that holds a collection of colors, all associated with the same
+ * reference number.
+ *
+ * This interface should only be used when sending data from penpot to the
+ * plugin. Using it for bulk operations may render the penpot plugin
+ * unresponsive during processing. Prefer in this case {@link ColorData}
+ * instead.
+ */
 interface PenpotColorsData {
   colors: LibraryColor[];
+  ref: number;
 }
 
-interface ColorsData {
-  colors: LibraryColor[];
+/**
+ * Message data that holds a single color and a reference number.
+ */
+interface ColorData {
+  color: LibraryColor;
   ref: number;
 }
 
 interface PenpotShapesData {
   shapes: Shape[];
-}
-
-interface PenpotColorData {
-  color: LibraryColor;
-  ref: number;
 }
 
 export type {
@@ -136,15 +113,12 @@ export type {
   Message,
   PenpotData,
   PluginData,
-  PenpotThemeData,
+  ThemeData,
   PenpotMappingData,
   PenpotColorsData,
   PenpotShapesData,
-  PenpotColorData,
-  CreateLocalLibraryColorData,
-  UpdateLibraryColorData,
   SwapColorsData,
   DeleteLocalLibraryThemeData,
   ColorMap,
-  ColorsData,
+  ColorData,
 };

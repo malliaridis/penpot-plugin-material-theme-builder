@@ -21,12 +21,10 @@ import {
   mapColorsToThemes,
 } from "../utils/color-utils.ts";
 import {
-  CreateLocalLibraryColorData,
+  ColorData,
   DeleteLocalLibraryThemeData,
   Message,
   MessageData,
-  PenpotColorData,
-  UpdateLibraryColorData,
 } from "../model/message.ts";
 import { ToastData } from "../model/ToastData.ts";
 import { LibraryColor } from "@penpot/plugin-types";
@@ -120,12 +118,12 @@ class MessageThemeBuilderService
         const listener = (event: MessageEvent<Message<MessageData>>) => {
           if (
             event.data.source != "penpot" ||
-            event.data.type != "library-color-created"
+            event.data.type != "color-created"
           ) {
             return;
           }
 
-          const data = event.data.data as PenpotColorData;
+          const data = event.data.data as ColorData;
 
           if (data.ref != ref) return;
 
@@ -169,11 +167,12 @@ class MessageThemeBuilderService
 
         // Create source color
         const argbColor = theme.source;
-        this.createLocalLibraryColor(
-          hexFromArgb(argbColor),
-          1,
-          themeName,
-          "source",
+        this.createColor(
+          {
+            color: hexFromArgb(argbColor),
+            path: themeName,
+            name: "source",
+          } as LibraryColor,
           ref,
         );
 
@@ -195,7 +194,7 @@ class MessageThemeBuilderService
     // TODO Add support for theme.customColors
   }
 
-  updateTheme(
+  async updateTheme(
     pluginTheme: PluginTheme,
     themeName: string | undefined,
     sourceColor: string | undefined,
@@ -217,13 +216,27 @@ class MessageThemeBuilderService
       ? themeFromSourceColor(argbFromHex(sourceColor))
       : undefined;
 
-    const updates: Partial<UpdateLibraryColorData>[] = [];
-
     const colors = flattenColors(pluginTheme, false);
 
-    colors.forEach((color) => {
+    const updates = colors.map((color) => {
       // Generate updates for all colors in the current pluginTheme
-      updates.push(this.createColorUpdate(color, ref, theme, themeName));
+
+      const segments = color.path.split(" / ");
+
+      if (theme) {
+        const colorValue = getColorForPathSegments(theme, segments, color.name);
+        if (colorValue) {
+          color.color = hexFromArgb(colorValue);
+        } else {
+          console.warn("Unsupported color found: " + JSON.stringify(color));
+        }
+      }
+      if (themeName) {
+        segments[0] = themeName;
+        color.path = segments.join("/");
+      }
+
+      return color;
     });
 
     const shouldGenerateStateLayers =
@@ -231,7 +244,7 @@ class MessageThemeBuilderService
     const shouldGenerateTonalPalettes =
       withTonalPalettes && pluginTheme.palettes.length == 0;
 
-    let expectedColorCount = updates.length;
+    let expectedColorCount = colors.length;
     if (shouldGenerateStateLayers) {
       expectedColorCount += 174;
     }
@@ -240,25 +253,28 @@ class MessageThemeBuilderService
     }
     const updatedColors: LibraryColor[] = [];
 
+    console.log("Returning promise");
     // Prepare promise for the updated colors
-    const promise = new Promise(
+    return await new Promise(
       (
         resolve: (value: PluginTheme) => void,
         reject: (reason: Error) => void,
       ) => {
+        console.log("Creating event listener");
         const listener = (event: MessageEvent<Message<MessageData>>) => {
+          console.log("listener called");
           if (
             event.data.source != "penpot" ||
-            (event.data.type != "library-color-updated" &&
-              event.data.type != "library-color-created")
+            (event.data.type != "color-updated" &&
+              event.data.type != "color-created")
           ) {
             return;
           }
 
-          const data = event.data.data as PenpotColorData;
+          const data = event.data.data as ColorData;
 
           if (data.ref != ref) return;
-
+          console.log("Notifying progress");
           updatedColors.push(data.color);
           this.onUpdate({
             type: "progress-updated",
@@ -268,114 +284,82 @@ class MessageThemeBuilderService
             ref,
           } as ToastData);
 
-          if (updatedColors.length == expectedColorCount) {
-            this.onUpdate({
-              type: "progress-updated",
-              message: "Finalizing theme update...",
-              ref,
-            } as ToastData);
+          if (updatedColors.length < expectedColorCount) return;
 
-            const pluginTheme = mapColorsToThemes(updatedColors);
-            if (pluginTheme.length != 1) {
-              reject(
-                new Error(
-                  `Expected exactly one theme to be generated, but got ${pluginTheme.length.toString()}`,
-                ),
+          this.onUpdate({
+            type: "progress-updated",
+            message: "Finalizing theme update...",
+            ref,
+          } as ToastData);
+
+          const pluginTheme = mapColorsToThemes(updatedColors);
+          if (pluginTheme.length != 1) {
+            reject(
+              new Error(
+                `Expected exactly one theme to be generated, but got ${pluginTheme.length.toString()}`,
+              ),
+            );
+          }
+
+          this.onUpdate({
+            type: "progress-completed",
+            message: "Theme updated successfully.",
+            ref,
+          } as ToastData);
+
+          window.removeEventListener("message", listener);
+          resolve(pluginTheme[0]);
+        };
+        console.log("adding event listener");
+        window.addEventListener("message", listener);
+
+        // Send updates to penpot
+        updates.forEach((update) => {
+          this.sendMessage("update-color", {
+            color: update,
+            ref,
+          } as ColorData);
+        });
+
+        if (shouldGenerateTonalPalettes || shouldGenerateStateLayers) {
+          let requiredTheme: Theme;
+          if (theme) {
+            requiredTheme = theme;
+          } else if (pluginTheme.source.color) {
+            requiredTheme = themeFromSourceColor(
+              argbFromHex(pluginTheme.source.color),
+            );
+          } else {
+            throw new Error(
+              "No source color available to generate tonal palettes or state layers.",
+            );
+          }
+
+          const requiredThemeName = themeName ?? pluginTheme.name;
+
+          if (shouldGenerateTonalPalettes) {
+            this.createTonalPalettes(
+              requiredThemeName,
+              requiredTheme.palettes,
+              ref,
+            );
+          }
+
+          if (shouldGenerateStateLayers) {
+            for (const scheme in requiredTheme.schemes) {
+              const jsonScheme: JsonScheme =
+                requiredTheme.schemes[scheme as keyof Schemes].toJSON();
+              this.createStateLayerColors(
+                requiredThemeName,
+                scheme,
+                jsonScheme,
+                ref,
               );
             }
-
-            this.onUpdate({
-              type: "progress-completed",
-              message: "Theme updated.",
-              ref,
-            } as ToastData);
-
-            window.removeEventListener("message", listener);
-            resolve(pluginTheme[0]);
           }
-        };
-
-        window.addEventListener("message", listener);
+        }
       },
     );
-
-    // Send updates to penpot
-    updates.forEach((update) => {
-      this.updateColorResource(update);
-    });
-
-    if (shouldGenerateTonalPalettes || shouldGenerateStateLayers) {
-      let requiredTheme: Theme;
-      if (theme) {
-        requiredTheme = theme;
-      } else if (pluginTheme.source.color) {
-        requiredTheme = themeFromSourceColor(
-          argbFromHex(pluginTheme.source.color),
-        );
-      } else {
-        throw new Error(
-          "No source color available to generate tonal palettes or state layers.",
-        );
-      }
-
-      const requiredThemeName = themeName ?? pluginTheme.name;
-
-      if (shouldGenerateTonalPalettes) {
-        this.createTonalPalettes(
-          requiredThemeName,
-          requiredTheme.palettes,
-          ref,
-        );
-      }
-
-      if (shouldGenerateStateLayers) {
-        for (const scheme in requiredTheme.schemes) {
-          const jsonScheme: JsonScheme =
-            requiredTheme.schemes[scheme as keyof Schemes].toJSON();
-          this.createStateLayerColors(
-            requiredThemeName,
-            scheme,
-            jsonScheme,
-            ref,
-          );
-        }
-      }
-    }
-
-    return promise;
-  }
-
-  private createColorUpdate(
-    color: LibraryColor,
-    ref: number,
-    theme?: Theme,
-    themeName?: string,
-  ): Partial<UpdateLibraryColorData> {
-    const segments = color.path.split(" / ");
-    const update: Partial<UpdateLibraryColorData> = { color, ref };
-    if (theme) {
-      const colorValue = getColorForPathSegments(theme, segments, color.name);
-      if (colorValue) {
-        update.value = hexFromArgb(colorValue);
-      } else {
-        console.warn("Unsupported color found: " + JSON.stringify(color));
-      }
-    }
-    if (themeName) {
-      segments[0] = themeName;
-      update.path = segments.join("/");
-    }
-    return update;
-  }
-
-  /**
-   * Sends update messages with the changed values of a color resource.
-   *
-   * @param update The update to apply to the color contained.
-   * @private
-   */
-  private updateColorResource(update: Partial<UpdateLibraryColorData>) {
-    this.sendMessage("update-library-color", update);
   }
 
   deleteTheme(deleteTheme: string): Promise<void> {
@@ -399,11 +383,12 @@ class MessageThemeBuilderService
   ) {
     for (const colorName in jsonScheme) {
       const argbColor = jsonScheme[colorName];
-      this.createLocalLibraryColor(
-        hexFromArgb(argbColor),
-        1,
-        `${themeName}/scheme/${name}`,
-        colorName,
+      this.createColor(
+        {
+          color: hexFromArgb(argbColor),
+          path: `${themeName}/scheme/${name}`,
+          name: colorName,
+        } as LibraryColor,
         ref,
       );
     }
@@ -419,11 +404,13 @@ class MessageThemeBuilderService
       const argbColor = jsonScheme[colorName];
       stateOpacities.forEach((opacity) => {
         const color = hexFromArgb(argbWithOpacity(argbColor, opacity));
-        this.createLocalLibraryColor(
-          color,
-          opacity,
-          `${themeName}/state-layers/${name}/${colorName}`,
-          `opacity-${opacity.toFixed(2).toString()}`,
+        this.createColor(
+          {
+            color,
+            opacity,
+            path: `${themeName}/state-layers/${name}/${colorName}`,
+            name: `opacity-${opacity.toFixed(2).toString()}`,
+          } as LibraryColor,
           ref,
         );
       });
@@ -449,30 +436,19 @@ class MessageThemeBuilderService
   ) {
     toneValues.forEach((tone) => {
       const argbColor = palette.tone(tone);
-      this.createLocalLibraryColor(
-        hexFromArgb(argbColor),
-        1,
-        `${themeName}/palettes`,
-        `${name}-${tone.toString()}`,
+      this.createColor(
+        {
+          color: hexFromArgb(argbColor),
+          path: `${themeName}/palettes`,
+          name: `${name}-${tone.toString()}`,
+        } as LibraryColor,
         ref,
       );
     });
   }
 
-  private createLocalLibraryColor(
-    color: string,
-    opacity: number,
-    group: string,
-    name: string,
-    ref: number,
-  ) {
-    this.sendMessage("create-local-library-color", {
-      color,
-      opacity,
-      group,
-      name,
-      ref,
-    } as CreateLocalLibraryColorData);
+  private createColor(color: LibraryColor, ref: number) {
+    this.sendMessage("create-color", { color, ref } as ColorData);
   }
 }
 

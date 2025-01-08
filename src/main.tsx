@@ -2,12 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import App from "./App.tsx";
-import {
-  Message,
-  PenpotData,
-  PenpotThemeData,
-  PluginData,
-} from "./model/message.ts";
+import { Message, PenpotData, ThemeData, PluginData } from "./model/message.ts";
 import { PenpotContextProvider } from "./components/penpot/PenpotContextProvider.tsx";
 
 // get the current theme from the URL
@@ -45,7 +40,7 @@ window.addEventListener(
   "message",
   (event: MessageEvent<Message<PenpotData>>) => {
     if (event.data.source === "penpot" && event.data.type === "theme-changed") {
-      document.body.dataset.theme = (event.data.data as PenpotThemeData).theme;
+      document.body.dataset.theme = (event.data.data as ThemeData).theme;
     }
   },
 );

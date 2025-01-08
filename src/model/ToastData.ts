@@ -23,6 +23,12 @@ interface ToastData {
   total?: number;
 
   /**
+   * The progress to display in the loading bar. If not set, will fall back to
+   * {@link loaded} divided by {@link total}.
+   */
+  progress?: number;
+
+  /**
    * Whether the current toast loader is closeable.
    */
   closable?: boolean;
