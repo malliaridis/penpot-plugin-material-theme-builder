@@ -23,4 +23,5 @@ export default defineConfig({
   preview: {
     port: 4400,
   },
+  base: "/penpot-plugin-material-theme-builder/",
 });
