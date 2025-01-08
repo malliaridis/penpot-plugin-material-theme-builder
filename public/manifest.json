@@ -1,7 +1,8 @@
 {
   "name": "Material Theme Builder",
+  "description": "A collection of theming tools based on Material 3.",
   "code": "plugin.js",
-  "description": "This is a Penpot plugin for generating Material assets",
+  "icon": "favicon.svg",
   "permissions": [
     "content:read",
     "content:write",
