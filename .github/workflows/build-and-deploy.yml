@@ -48,6 +48,10 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Deploy to gh-pages
+      - name: Deploy with gh-pages
         if: startsWith(github.ref, 'refs/tags/v')
-        run: npm run deploy
+        run: |
+          git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          npm run deploy -- -u "github-actions-bot <support+actions@github.com>"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

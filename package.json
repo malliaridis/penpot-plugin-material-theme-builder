@@ -1,14 +1,14 @@
 {
   "name": "penpot-plugin-material-theme-builder",
   "private": true,
-  "version": "1.0.0-rc1",
+  "version": "1.0.0-rc2",
   "type": "module",
   "scripts": {
     "dev": "vite-live-preview",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "echo TODO No tests present",
-    "deploy": "gh-pages --nojekyll --repo https://github.com/malliaridis/penpot-plugin-material-theme-builder.git",
+    "deploy": "gh-pages -d dist/ --nojekyll",
     "lint": "eslint . && prettier . --check",
     "lint:fix": "eslint . --fix && prettier . --write"
   },
