@@ -23,8 +23,13 @@ const ToastContextProvider: FC<ToastContextProviderProps> = ({ children }) => {
   const onUpdate = (data: ToastData) => {
     let progress: number | undefined;
     let progressMessage: string | undefined;
-    if (data.loaded && data.total) {
+    if (data.progress) {
+      progress = data.progress;
+    } else if (data.loaded && data.total) {
       progress = data.loaded / data.total;
+    }
+
+    if (data.loaded && data.total) {
       progressMessage = data.loaded.toString() + "/" + data.total.toString();
     }
 

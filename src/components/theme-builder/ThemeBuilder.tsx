@@ -54,15 +54,12 @@ const ThemeBuilder: FC = () => {
   const onUpdateClicked = () => {
     if (!currentTheme) return;
 
-    // Always provide a theme name to (re)generate a path, as with the latest
-    // penpot updates, the path is reset after setting the color value
-    const newName = themeName != "" ? themeName : currentTheme.name;
-    // const newName =
-    //   themeName != "" && themeName != currentTheme.name ? themeName : undefined;
+    const newName =
+      themeName != "" && themeName != currentTheme.name ? themeName : undefined;
 
     const color = colorPickerRef.current?.getColor();
     const newColor = color != currentTheme.source.color ? color : undefined;
-    // TODO Display notification bar here
+
     materialService
       .updateTheme(
         currentTheme,

@@ -262,6 +262,27 @@ function doThemesMatch(theme1?: PluginTheme, theme2?: PluginTheme): boolean {
   }, {});
 }
 
+function sameColorReference(
+  color1: LibraryColor,
+  color2: LibraryColor,
+): boolean {
+  if (color1.name !== color2.name) return false;
+
+  const path1 = color1.path.split(" / ");
+  path1.shift();
+  const path2 = color2.path.split(" / ");
+  path2.shift();
+
+  return areArraysEqual(path1, path2);
+}
+
+function areArraysEqual(array1: string[], array2: string[]): boolean {
+  if (array1.length !== array2.length) {
+    return false;
+  }
+  return array1.every((value, index) => value === array2[index]);
+}
+
 export {
   getValidSourceColor,
   argbWithOpacity,
@@ -273,4 +294,5 @@ export {
   colorCompare,
   isFillArray,
   doThemesMatch,
+  sameColorReference,
 };

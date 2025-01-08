@@ -21,7 +21,7 @@ class MessageService {
    * @param type The message type
    * @param data Data to send
    */
-  sendMessage(type: string, data: object | undefined = undefined) {
+  readonly sendMessage = (type: string, data: object | undefined) => {
     parent.postMessage(
       {
         source: "plugin",
@@ -30,7 +30,7 @@ class MessageService {
       } as Message<PluginData>,
       "*",
     );
-  }
+  };
 }
 
 export { MessageService };
