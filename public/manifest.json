@@ -2,7 +2,7 @@
   "name": "Material Theme Builder",
   "description": "A collection of theming tools based on Material 3.",
   "code": "plugin.js",
-  "icon": "favicon.svg",
+  "icon": "icon.png",
   "permissions": [
     "content:read",
     "content:write",
