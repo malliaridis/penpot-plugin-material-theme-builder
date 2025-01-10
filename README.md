@@ -13,7 +13,7 @@ For a detailed getting started tutorial, read
 To start using this plugin, add the following URL to your plugin manager:
 
 ```
-https://malliaridis.github.io/penpot-plugin-material-theme-builder/manifest.json
+https://penpot.malliaridis.com/manifest.json
 ```
 
 For more information on how to add plugins, refer to
@@ -21,11 +21,15 @@ For more information on how to add plugins, refer to
 
 ## Features
 
-- Create Material 3 theme assets, including colors and typography from a source
-  color or image
+- Create Material 3 theme assets, including colors _and typography (planned)_
+  from a source color _or image (planned)_
 - Manage multiple themes and switch between them on the fly
-- Hot-swap the theme including light and dark theme for selected content or
-  entire pages
+- Configure the theme colors used and switch between light and dark theme for
+  selected shapes or entire pages
+- Replace existing theme values with values from other themes
+
+Note that the current version does not support custom colors put into the theme
+groups.
 
 ## Permissions
 
@@ -64,14 +68,12 @@ loaded in Penpot with the url `http://localhost:4400/manifest.json`.
 
 ### Deployment
 
-This plugin is automatically deployed on GitHub pages via GitHub actions on
-tag releases.
+This plugin is automatically deployed on GitHub pages.
 
 ## Contributing
 
 If you find any bug or have a feature request, feel free to create a new
-GitHub issue. You are also welcome to create a pull request and request changes
-that way.
+GitHub issue. You are also welcome to create a pull request and request changes.
 
 ## Licensing
 
