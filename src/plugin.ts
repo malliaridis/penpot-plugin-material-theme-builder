@@ -247,39 +247,45 @@ function updateShapeColors(shapes: Shape[], mappings: ColorMap, ref: number) {
 
   shapes.forEach((shape) => {
     const fills = shape.fills;
+    const strokes = shape.strokes;
     let updated = false;
 
-    if (!isFillArray(fills)) {
-      penpot.ui.sendMessage({
-        source: "penpot",
-        type: "shape-colors-updated",
-        data: {
-          id: shape.id,
-          updated,
-          ref,
-        } as PenpotMappingData,
-      } as Message<PenpotData>);
-      return;
+    const libraryColors = allLibraries().flatMap((library) => library.colors);
+
+    if (isFillArray(fills)) {
+      // Use mappings to replace the current fills
+      shape.fills = fills.map((fill) => {
+        if (fill.fillColorRefId) {
+          const mappedColor = mappings[fill.fillColorRefId];
+          if (!mappedColor) return fill;
+
+          const actualColor = libraryColors.find(
+            (color) => color.id == mappedColor.id,
+          );
+          if (actualColor) {
+            updated = true;
+            return actualColor.asFill();
+          }
+        }
+        return fill;
+      });
     }
 
-    // Use mappings to replace the curren fills
-    shape.fills = fills.map((fill) => {
-      if (fill.fillColorRefId) {
-        const mappedColor = mappings[fill.fillColorRefId];
-        if (!mappedColor) return fill;
+    shape.strokes = strokes.map((stroke) => {
+      if (stroke.strokeColorRefId) {
+        const mappedColor = mappings[stroke.strokeColorRefId];
+        if (!mappedColor) return stroke;
 
-        const libraryColors = allLibraries().flatMap(
-          (library) => library.colors,
-        );
         const actualColor = libraryColors.find(
           (color) => color.id == mappedColor.id,
         );
+
         if (actualColor) {
           updated = true;
-          return actualColor.asFill();
+          return actualColor.asStroke();
         }
       }
-      return fill;
+      return stroke;
     });
 
     penpot.ui.sendMessage({
