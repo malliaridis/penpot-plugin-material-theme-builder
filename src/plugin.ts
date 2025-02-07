@@ -18,6 +18,7 @@ import {
   LibraryColor,
   Page,
   Shape,
+  Stroke,
 } from "@penpot/plugin-types";
 
 penpot.ui.open("Material Theme Builder", `?theme=${penpot.theme}`);
@@ -282,7 +283,7 @@ function updateShapeColors(shapes: Shape[], mappings: ColorMap, ref: number) {
 
         if (actualColor) {
           updated = true;
-          return actualColor.asStroke();
+          return updateAndGetStroke(stroke, actualColor);
         }
       }
       return stroke;
@@ -308,6 +309,28 @@ function updateShapeColors(shapes: Shape[], mappings: ColorMap, ref: number) {
       ref,
     } as PenpotMappingData,
   });
+}
+
+/**
+ * Generates a new stroke from {@code color} and applies metadata like opacity
+ * and stroke width from existing {@code stroke}.
+ *
+ * This additional mapping is necessary because converting a color to a stroke
+ * would reset existing values.
+ *
+ * @param stroke The existing stroke to update the color / use the metadata from
+ * @param color The color to use for the new stroke
+ * @return a new Stroke
+ */
+function updateAndGetStroke(stroke: Stroke, color: LibraryColor) {
+  const newStroke = color.asStroke(); // covers color values and opacity
+  newStroke.strokeAlignment = stroke.strokeAlignment;
+  newStroke.strokeStyle = stroke.strokeStyle;
+  newStroke.strokeCapStart = stroke.strokeCapStart;
+  newStroke.strokeCapEnd = stroke.strokeCapEnd;
+  newStroke.strokeWidth = stroke.strokeWidth;
+  newStroke.strokeColorGradient = stroke.strokeColorGradient;
+  return newStroke;
 }
 
 /**
