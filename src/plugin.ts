@@ -17,6 +17,7 @@ import {
   Library,
   LibraryColor,
   Page,
+  Shadow,
   Shape,
   Stroke,
 } from "@penpot/plugin-types";
@@ -249,6 +250,8 @@ function updateShapeColors(shapes: Shape[], mappings: ColorMap, ref: number) {
   shapes.forEach((shape) => {
     const fills = shape.fills;
     const strokes = shape.strokes;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const shadows: Shadow[] = shape.shadows ?? [];
     let updated = false;
 
     const libraryColors = allLibraries().flatMap((library) => library.colors);
@@ -287,6 +290,24 @@ function updateShapeColors(shapes: Shape[], mappings: ColorMap, ref: number) {
         }
       }
       return stroke;
+    });
+
+    shape.shadows = shadows.map((shadow) => {
+      if (shadow.color?.id) {
+        const mappedColor = mappings[shadow.color.id];
+        if (!mappedColor) return shadow;
+
+        const actualColor = libraryColors.find(
+          (color) => color.id == mappedColor.id,
+        );
+
+        if (actualColor) {
+          updated = true;
+          shadow.color = actualColor;
+          return shadow;
+        }
+      }
+      return shadow;
     });
 
     penpot.ui.sendMessage({
