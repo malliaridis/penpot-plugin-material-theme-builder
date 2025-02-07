@@ -67,7 +67,7 @@ function Selector<T>({
       <span
         className={label ? "input-label body-m" : "input-label-hidden body-m"}
       >
-        {label ? label : undefined}
+        {label}
       </span>
       <div
         tabIndex={0}
