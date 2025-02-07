@@ -17,7 +17,9 @@ import {
   Library,
   LibraryColor,
   Page,
+  Shadow,
   Shape,
+  Stroke,
 } from "@penpot/plugin-types";
 
 penpot.ui.open("Material Theme Builder", `?theme=${penpot.theme}`);
@@ -247,39 +249,65 @@ function updateShapeColors(shapes: Shape[], mappings: ColorMap, ref: number) {
 
   shapes.forEach((shape) => {
     const fills = shape.fills;
+    const strokes = shape.strokes;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const shadows: Shadow[] = shape.shadows ?? [];
     let updated = false;
 
-    if (!isFillArray(fills)) {
-      penpot.ui.sendMessage({
-        source: "penpot",
-        type: "shape-colors-updated",
-        data: {
-          id: shape.id,
-          updated,
-          ref,
-        } as PenpotMappingData,
-      } as Message<PenpotData>);
-      return;
+    const libraryColors = allLibraries().flatMap((library) => library.colors);
+
+    if (isFillArray(fills)) {
+      // Use mappings to replace the current fills
+      shape.fills = fills.map((fill) => {
+        if (fill.fillColorRefId) {
+          const mappedColor = mappings[fill.fillColorRefId];
+          if (!mappedColor) return fill;
+
+          const actualColor = libraryColors.find(
+            (color) => color.id == mappedColor.id,
+          );
+          if (actualColor) {
+            updated = true;
+            return actualColor.asFill();
+          }
+        }
+        return fill;
+      });
     }
 
-    // Use mappings to replace the curren fills
-    shape.fills = fills.map((fill) => {
-      if (fill.fillColorRefId) {
-        const mappedColor = mappings[fill.fillColorRefId];
-        if (!mappedColor) return fill;
+    shape.strokes = strokes.map((stroke) => {
+      if (stroke.strokeColorRefId) {
+        const mappedColor = mappings[stroke.strokeColorRefId];
+        if (!mappedColor) return stroke;
 
-        const libraryColors = allLibraries().flatMap(
-          (library) => library.colors,
-        );
         const actualColor = libraryColors.find(
           (color) => color.id == mappedColor.id,
         );
+
         if (actualColor) {
           updated = true;
-          return actualColor.asFill();
+          return updateAndGetStroke(stroke, actualColor);
         }
       }
-      return fill;
+      return stroke;
+    });
+
+    shape.shadows = shadows.map((shadow) => {
+      if (shadow.color?.id) {
+        const mappedColor = mappings[shadow.color.id];
+        if (!mappedColor) return shadow;
+
+        const actualColor = libraryColors.find(
+          (color) => color.id == mappedColor.id,
+        );
+
+        if (actualColor) {
+          updated = true;
+          shadow.color = actualColor;
+          return shadow;
+        }
+      }
+      return shadow;
     });
 
     penpot.ui.sendMessage({
@@ -302,6 +330,28 @@ function updateShapeColors(shapes: Shape[], mappings: ColorMap, ref: number) {
       ref,
     } as PenpotMappingData,
   });
+}
+
+/**
+ * Generates a new stroke from {@code color} and applies metadata like opacity
+ * and stroke width from existing {@code stroke}.
+ *
+ * This additional mapping is necessary because converting a color to a stroke
+ * would reset existing values.
+ *
+ * @param stroke The existing stroke to update the color / use the metadata from
+ * @param color The color to use for the new stroke
+ * @return a new Stroke
+ */
+function updateAndGetStroke(stroke: Stroke, color: LibraryColor) {
+  const newStroke = color.asStroke(); // covers color values and opacity
+  newStroke.strokeAlignment = stroke.strokeAlignment;
+  newStroke.strokeStyle = stroke.strokeStyle;
+  newStroke.strokeCapStart = stroke.strokeCapStart;
+  newStroke.strokeCapEnd = stroke.strokeCapEnd;
+  newStroke.strokeWidth = stroke.strokeWidth;
+  newStroke.strokeColorGradient = stroke.strokeColorGradient;
+  return newStroke;
 }
 
 /**
