@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
-    "@penpot/plugin-types": "1.1.0",
+    "@penpot/plugin-types": "1.2.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.3",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
